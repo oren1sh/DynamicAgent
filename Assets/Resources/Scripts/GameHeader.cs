@@ -9,7 +9,7 @@ public class GameHeader : MonoBehaviour {
     public static int CurrentTurn { set; get; }
     public static string Borad { set; get; }
     public static int BoradSize { set; get; }
-    public static Dictionary< Tuple <String , bool>, Dictionary<int,BitArray>> GeneSet;
+    public static Dictionary<string,Dictionary<int,BitArray>> WinGeneSet;
     public static string[] Tokens{ set; get; }
     public static string Win { set; get; }
     public static bool BWin { set; get; }
@@ -31,6 +31,7 @@ public class GameHeader : MonoBehaviour {
         BoradSize = 3;
         Borad = new string('_', BoradSize * BoradSize);
         BWin = false;
+        OnEditWin = false;
         Debug.Log("numPlayers" + numPlayers);
         Debug.Log("CurrentTurn" + CurrentTurn);
         Debug.Log("BoradSize" + BoradSize);
@@ -38,14 +39,17 @@ public class GameHeader : MonoBehaviour {
         Debug.Log("BWin" + BWin);
     }
 
+    //GeneSet
 
+    //    Dictionary<int, Transform> childDic = new Dictionary<int, Transform>();
+    //childDic.Add(childIndex, t);
+    //    childIndex++;
+    //    gamesTransformsLoadedIntoScreen2.Add(t.gameObject.name, childDic);
 
     // Use this for initialization
     void Start () {
 
-        GeneSet.Add("X",;
-
-
+        
 
 
 
@@ -65,9 +69,18 @@ public class GameHeader : MonoBehaviour {
 
 
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    public void NextPlayer(TextAlignment t)
+    {
+        NextTurn();
+        CurrentToken = Tokens[CurrentTurn % numPlayers];
+
+
+    }
+
+
+    // Update is called once per frame
+    void Update () {
 		
 	}
 }

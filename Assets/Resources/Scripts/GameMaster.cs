@@ -13,7 +13,7 @@ public class GameMaster : MonoBehaviour {
     private Text[] TtB;// = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
     private List<Button> buttons;
 
-
+    GameHeader gameHeader = new GameHeader();
 
    
     // Use this for initialization
@@ -26,7 +26,6 @@ public class GameMaster : MonoBehaviour {
         Debug.Log("TtB size  == " + TtB.Length);
 
         SetBoard();
-
 
     }
 
@@ -76,7 +75,7 @@ public class GameMaster : MonoBehaviour {
 
     }
 
-    public void GetBoard()
+    public string GetBoard()
     {
         foreach (Button Bnt in buttons)
         {
@@ -88,7 +87,7 @@ public class GameMaster : MonoBehaviour {
             TtB[num-1] = Bnt.GetComponentInChildren<Text>();
             
         }
-
+        return TtB.ToString();
     }
 
     private string SetText()
