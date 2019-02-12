@@ -11,15 +11,15 @@ public class GameMaster : MonoBehaviour {
 
     private Text Tt;
     private Text[] TtB;// = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
-    private List<Button> buttons;
+    private List<Button> Buttons;
 
-    GameHeader gameHeader = new GameHeader();
+    GameHeader GameHeader;
 
    
     // Use this for initialization
     void Start () {
         Tt = TBoard.GetComponentInChildren<Text>();
-        buttons = TBoard.GetComponentsInChildren<Button>().ToList();
+        Buttons = TBoard.GetComponentsInChildren<Button>().ToList();
 
         TtB = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
         Debug.Log("GameHeader.BoradSize  == " + GameHeader.BoradSize);
@@ -40,6 +40,7 @@ public class GameMaster : MonoBehaviour {
         Debug.Log("OnPress=>" + Bnt);
         if (GameHeader.OnEditWin)
         {
+            Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;
             return;
 
 
@@ -65,7 +66,7 @@ public class GameMaster : MonoBehaviour {
 
     public void SetBoard()
     {
-        foreach (Button Bnt in buttons)
+        foreach (Button Bnt in Buttons)
         {
             Bnt.GetComponentInChildren<Text>().text = "";
 
@@ -77,7 +78,9 @@ public class GameMaster : MonoBehaviour {
 
     public string GetBoard()
     {
-        foreach (Button Bnt in buttons)
+        string str;
+
+        foreach (Button Bnt in Buttons)
         {
             int num = int.Parse(Bnt.name.Replace("Button-", ""));
             //Debug.Log("int num is == " + num);
@@ -87,7 +90,14 @@ public class GameMaster : MonoBehaviour {
             TtB[num-1] = Bnt.GetComponentInChildren<Text>();
             
         }
-        return TtB.ToString();
+        str = TtB.ToString();
+        if (GameHeader.NeedToTrns)
+        {
+            foreach (string key in GameHeader.TokenTrns.Keys)
+                str.Replace(key, GameHeader.TokenTrns[key]);
+        }
+
+        return str;
     }
 
     private string SetText()

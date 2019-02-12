@@ -9,12 +9,14 @@ public class GameHeader : MonoBehaviour {
     public static int CurrentTurn { set; get; }
     public static string Borad { set; get; }
     public static int BoradSize { set; get; }
-    public static Dictionary<string,Dictionary<int,BitArray>> WinGeneSet;
+    public static Dictionary<string,List<BitArray>> WinGeneSet { get; set; }//key=token,vale = bitarray
+    public static Dictionary<string, string> TokenTrns;
     public static string[] Tokens{ set; get; }
     public static string Win { set; get; }
     public static bool BWin { set; get; }
     public static string CurrentToken { get; set;}
     public static bool OnEditWin { get; set; }
+    public static bool NeedToTrns { get; set; }
 
 
     private void Awake()
@@ -32,6 +34,7 @@ public class GameHeader : MonoBehaviour {
         Borad = new string('_', BoradSize * BoradSize);
         BWin = false;
         OnEditWin = false;
+        NeedToTrns = false;
         Debug.Log("numPlayers" + numPlayers);
         Debug.Log("CurrentTurn" + CurrentTurn);
         Debug.Log("BoradSize" + BoradSize);
