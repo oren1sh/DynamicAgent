@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class StateController : MonoBehaviour {
+
+/// <summary>
+/// all States func and data manipulation are here
+/// </summary>
+public class StateController {
     //this class need to hold all the states in the game
     public List<State> States;
 
-    public List<State> WinStates;
+    public static List<State> WinStates;
 
     public List<State> NewStates;
 
@@ -21,16 +25,22 @@ public class StateController : MonoBehaviour {
     private BitArray BitO;
     private BitArray BitA;
     private BitArray BitAND;
-    
+    private string EmptyStr;
     // Use this for initialization
-    void Start()
+    public StateController()
     {
-
+        WinStates = new List<State>();
         //set up the bitarray
-        BitX = new BitArray(GameHeader.BoradSize*GameHeader.BoradSize);
+        BitX = new BitArray(GameHeader.BoradSize * GameHeader.BoradSize);
         BitO = new BitArray(GameHeader.BoradSize * GameHeader.BoradSize);
         BitA = new BitArray(GameHeader.BoradSize * GameHeader.BoradSize); 
-        BitAND = new BitArray(GameHeader.BoradSize * GameHeader.BoradSize); 
+        BitAND = new BitArray(GameHeader.BoradSize * GameHeader.BoradSize);
+        EmptyStr = new string('_',GameHeader.BoradSize * GameHeader.BoradSize);
+
+        Debug.Log("BitX " + BitX.Length);
+        Debug.Log("BitO " + BitO.Length);
+        Debug.Log("BitA " + BitA.Length);
+        Debug.Log("BitAND " + BitAND.Length);
 
 
     }
@@ -41,12 +51,13 @@ public class StateController : MonoBehaviour {
 
          
     }
+    
     private bool SearchInLayers(string Target)
     {
         States = DicByLayer[GameHeader.CurrentTurn];
         foreach (State S in States)
         {
-            if (S.id == Target)
+            if (S.Id == Target)
                 return true;
 
         }
@@ -63,12 +74,84 @@ public class StateController : MonoBehaviour {
 
     }
 
-    public void AddWinState(string WinStr)//add a win state from control
+    public void AddWinGene(string WinStr,string Token)//add a win state from control to Header
     {
-        
+        if(EmptyStr == WinStr)
+        {
+            Debug.Log("EmptyStr == WinStr");
+            return;
+        }
+        string DebugStr ="";
+        int i = 0;
+        foreach (char t in WinStr)
+        {
+            //Debug.Log(" i = " + i);
+            //Debug.Log(" t = " + t + "Token = " + Token + "t.Equals(char.Parse(Token)) = " + t.Equals(char.Parse(Token)));
+            BitX[i] = t.Equals(char.Parse(Token));
+            DebugStr += t.Equals(char.Parse(Token));
+            DebugStr += "-";
+            i++;
+        }
+
+        if (!GameHeader.WinGeneSet[Token].Exists(x => BitArrayComp(x, BitX)))
+        {
+            
+            GameHeader.WinGeneSet[Token].Add(new BitArray(BitX));
+            SetSaveDate(WinStr, Token, BitX);
+            Debug.Log("GameHeader.WinGeneSet[Token].Count " + GameHeader.WinGeneSet[Token].Count);
+
+        }
+
+        BitX.SetAll(false);//reset the bitarray
+    }
+
+    int tok;
+    string WinStr2;
+    string Token2;
+    BitArray BitX2;
+
+    public void SetSaveDate(string WinStr, string Token,BitArray BitX)
+    {
+        WinStr2= WinStr;
+        Token2= Token;
+        BitX2=new BitArray(BitX);
+
+        Debug.Log("SetSaveDate(WinStr, Token, BitX)");
+        switch(Token)
+        {
+            case "X":
+                tok = 0;
+                break;
+            case "O":
+                tok = 1;
+                break;
+            case "@":
+                tok = 2;
+                break;
+            case "&":
+                tok = 3;
+                break;
+        }
+    
+        WinStates.Add(new State("M-" + WinStr2, true, BitX2, tok));
 
 
     }
+
+
+
+    public static bool BitArrayComp(BitArray a , BitArray b)
+    {
+        
+        for (int i = 0; i < a.Count; i++)
+        {
+            if (!(a[i] == b[i]))
+                return false;
+        }
+        return true;
+
+    }
+
 
 
     public Dictionary<string, BitArray> StringToBitArray(string Target)//add a win state from control
@@ -106,6 +189,10 @@ public class StateController : MonoBehaviour {
                 Debug.Log("error!!!  number of player is== " + GameHeader.numPlayers);
                 break;
         }
+        BitX.SetAll(false);
+        BitO.SetAll(false);
+        BitA.SetAll(false);
+        BitAND.SetAll(false);
 
         return DicToRet;
 
@@ -113,10 +200,5 @@ public class StateController : MonoBehaviour {
 
 
 
-    
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 }

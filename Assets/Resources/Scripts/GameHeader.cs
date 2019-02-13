@@ -5,6 +5,10 @@ using UnityEngine;
 
 public class GameHeader : MonoBehaviour {
 
+
+    public GameObject SceneObjects;
+
+
     public static int numPlayers { set; get; }
     public static int CurrentTurn { set; get; }
     public static string Borad { set; get; }
@@ -17,22 +21,30 @@ public class GameHeader : MonoBehaviour {
     public static string CurrentToken { get; set;}
     public static bool OnEditWin { get; set; }
     public static bool NeedToTrns { get; set; }
-
+    public static bool Dirty { get; set; }
 
     private void Awake()
     {
+        //general setup for a game(3X3)
         CurrentToken = "X";
+        WinGeneSet = new Dictionary<string, List<BitArray>>(4);
         Tokens = new string[4];
         Tokens[0] = "X";
+        WinGeneSet.Add("X", new List<BitArray>());
         Tokens[1] = "O";
+        WinGeneSet.Add("O", new List<BitArray>());
         Tokens[2] = "@";
+        WinGeneSet.Add("@", new List<BitArray>());
         Tokens[3] = "&";
+        WinGeneSet.Add("&", new List<BitArray>());
         Debug.Log("Tokens" + Tokens);
+        Debug.Log("WinGeneSet" + WinGeneSet);
         numPlayers = 2;
         CurrentTurn = 0;
         BoradSize = 3;
         Borad = new string('_', BoradSize * BoradSize);
         BWin = false;
+        Dirty = false;
         OnEditWin = false;
         NeedToTrns = false;
         Debug.Log("numPlayers" + numPlayers);
@@ -40,14 +52,15 @@ public class GameHeader : MonoBehaviour {
         Debug.Log("BoradSize" + BoradSize);
         Debug.Log("Borad" + Borad);
         Debug.Log("BWin" + BWin);
+        //end setup game
+
+        //active the game
+        SceneObjects.SetActive(true);
+        //
     }
 
-    //GeneSet
+ 
 
-    //    Dictionary<int, Transform> childDic = new Dictionary<int, Transform>();
-    //childDic.Add(childIndex, t);
-    //    childIndex++;
-    //    gamesTransformsLoadedIntoScreen2.Add(t.gameObject.name, childDic);
 
     // Use this for initialization
     void Start () {
@@ -57,7 +70,7 @@ public class GameHeader : MonoBehaviour {
 
 
     }
-    private static void NextTurn()
+    private static void NextTurn()//Layer++
     {
         CurrentTurn += 1;
 
@@ -65,25 +78,16 @@ public class GameHeader : MonoBehaviour {
     }
 
 
-    public static void NextPlayer()
+    public static void SetNextPlayerToken()
     {
         NextTurn();
         CurrentToken = Tokens[CurrentTurn % numPlayers];
-
-
-    }
-
-    public void NextPlayer(TextAlignment t)
-    {
-        NextTurn();
-        CurrentToken = Tokens[CurrentTurn % numPlayers];
-
+        
 
     }
 
 
-    // Update is called once per frame
-    void Update () {
-		
-	}
+
+
+   
 }

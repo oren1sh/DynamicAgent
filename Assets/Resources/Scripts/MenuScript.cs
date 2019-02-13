@@ -55,7 +55,7 @@ public class MenuScript : MonoBehaviour {
         HeadTextCom.SetActive(true);
         Board3.SetActive(true);
         GameHeader.OnEditWin = true;
-
+        Debug.Log(" GameHeader.OnEditWin " + GameHeader.OnEditWin);
     }
     public void OnSettings()
     {
