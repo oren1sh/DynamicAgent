@@ -8,7 +8,7 @@ using System;
 public class JsonManager : MonoBehaviour
 {
     public List<State> Statedata;
-    public List<Edge> Edgedata;
+    public static List<Edge> Edgedata { get; set; }
 
     public string pathStatedata;
     public string pathEdgedata;
@@ -27,12 +27,6 @@ public class JsonManager : MonoBehaviour
         pathEdgedata = Path.Combine(Application.streamingAssetsPath + "/saved files", "Edgedata.json");
         //SerializeData();
         //DeserializeData();
-    }
-
-    public void SaveState()
-    {
-        
-
     }
 
     //public void SerializeData()
@@ -68,6 +62,28 @@ public class JsonManager : MonoBehaviour
         SerializeStateData();
 
     }
+
+    
+    public static void SerializeEdgeData(List<Edge> NewEdges)
+    {
+        string pathEdgedata;
+        foreach (Edge edge in NewEdges)
+        {
+            File.Create(Application.streamingAssetsPath + @"\saved files\");
+            pathEdgedata = Path.Combine(Application.streamingAssetsPath + @"\saved files\", @"" + edge.Id + ".json");
+            Debug.Log("path is ="+ pathEdgedata);
+            Debug.Log("edge.Id is =" + edge.Id);
+            File.Create(pathEdgedata);
+            string jsonDataString = JsonUtility.ToJson(edge.Id);
+            Debug.Log(jsonDataString);
+            File.WriteAllText(pathEdgedata, jsonDataString);
+
+        }
+        Debug.Log("end of writing data");
+
+
+    }
+
     public void SerializeStateData()
     {
         //foreach (State item in Statedata)

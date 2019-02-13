@@ -9,21 +9,32 @@ public class GameMaster : MonoBehaviour {
 
     public GameObject TBoard;
     public GameHeader GameHeader;
+    StateController stateController;
+    EdgeController edgeController;
 
-    
     private Text Tt;
     private Text[] TtB;// = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
 
     public List<Button> Buttons;
+    public Dictionary<string, Button> StrToBnt;
+    public bool BEnd;
 
-    
+    public string PrevState;
+    public string CurrnetState;
 
-   
+
+
     // Use this for initialization
     void Start () {
-        Tt = TBoard.GetComponentInChildren<Text>();
-        Buttons = TBoard.GetComponentsInChildren<Button>().ToList();
-        
+        stateController = new StateController();
+        edgeController = new EdgeController();
+        Tt = TBoard.GetComponentInChildren<Text>();//get board header
+        Buttons = TBoard.GetComponentsInChildren<Button>().ToList();//get currnet board buttons
+        Dictionary<string, Button> StrToBnt = new Dictionary<string, Button>();
+        foreach (Button bnt in Buttons)
+        {
+            StrToBnt.Add(bnt.name.Replace("Button-", ""), bnt);//set the dic
+        }
         TtB = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
         Debug.Log("GameHeader.BoradSize  == " + GameHeader.BoradSize);
         Debug.Log("TtB size  == " + TtB.Length);
@@ -31,9 +42,19 @@ public class GameMaster : MonoBehaviour {
 
 
 
-        SetBoard();
+        SetBoard();//reset the board
 
     }
+
+    private void OnEnable()
+    {
+        Debug.Log("OnEnable() GameMaster");
+    }
+    private void OnDisable()
+    {
+        Debug.Log("OnDisable() GameMaster");
+    }
+
 
     // Update is called once per frame
     void Update () {
@@ -41,15 +62,18 @@ public class GameMaster : MonoBehaviour {
 		
 	}
 
-    public void OnPress(Button Bnt)//turn swich
+    public void OnPress(Button Bnt)//,,like end of turn''
     {
         Debug.Log("OnPress=>" + Bnt);
-        if (GameHeader.Dirty)
+        PrevState = GetBoard();
+        edgeController.AddNewEdge(edgeController.MakeEdgeId(Bnt.name.Replace("Button-", "")), PrevState, GameHeader.CurrentTurn);
+        
+        if (GameHeader.Dirty)//are we OnEdit1
         {
             SetBoard();
             GameHeader.Dirty = false;
         }
-        if (GameHeader.OnEditWin)
+        if (GameHeader.OnEditWin)//are we OnEdit2
         {
             
             Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;
@@ -57,15 +81,27 @@ public class GameMaster : MonoBehaviour {
 
 
         }
+        if(GameHeader.BWin)//is the game won
+        {
+            Tt.text = SetNextPlayerText();
+            return;
+        }
+        GameHeader.Borad = GetBoard();//get board
+        
 
+
+        if (GameHeader.CurrentToken != "X")//if not human player
+        {
+
+        }
 
 
         
-        Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;
+        Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;//puts the Token
 
-        GetBoard();
+        CurrnetState = GetBoard();
 
-        //TODO:check Win is win
+        
         //check if new state
         //check if new edge
 
@@ -82,23 +118,23 @@ public class GameMaster : MonoBehaviour {
         {
             Bnt.GetComponentInChildren<Text>().text = "_";
 
-            Debug.Log("set button num=" + (int.Parse(Bnt.name.Replace("Button-", ""))));
-            Debug.Log("set button text=" + Bnt.GetComponentInChildren<Text>().text);
+           // Debug.Log("set button num=" + (int.Parse(Bnt.name.Replace("Button-", ""))));
+            //Debug.Log("set button text=" + Bnt.GetComponentInChildren<Text>().text);
         }
 
     }
-
+    int index = 0;
     public void SetBoard(string Target)//set the board by state string
     {
-        int index = 0;
+        index = 0;
         foreach (Button Bnt in Buttons)
         {
             Bnt.GetComponentInChildren<Text>().text = Target[index]+"";
             index++;
-            Debug.Log("set button num=" + (int.Parse(Bnt.name.Replace("Button-", ""))));
-            Debug.Log("set button text=" + Bnt.GetComponentInChildren<Text>());
+         //   Debug.Log("set button num=" + (int.Parse(Bnt.name.Replace("Button-", ""))));
+         //   Debug.Log("set button text=" + Bnt.GetComponentInChildren<Text>());
         }
-        Debug.Log(index + " buttons text= " + Target);
+        //Debug.Log(index + " buttons text= " + Target);
     }
     
     public void SetBoard(BitArray Target , string token)//set the board by bitarray 
@@ -122,33 +158,30 @@ public class GameMaster : MonoBehaviour {
     }
 
     //end SetBoard funs
-
-    public string GetBoard()//get board data and return it as a string
+    string str;
+    public string GetBoard()//get board data and return it as a string Layer/w-123456789...
     {
 
-        string str = "";
-
+        str = "";
+        if(GameHeader.OnEditWin)
+        {
+            str += "W-";
+        }
+        else
+        {
+            str += GameHeader.CurrentTurn + "-";
+        }
+        
 
         foreach (Button Bnt in Buttons)
         {
-            int num = int.Parse(Bnt.name.Replace("Button-", ""));
-            Debug.Log("num = " + num);
-
-          
-            str += Bnt.GetComponentInChildren<Text>().text;
-
-            
-            Debug.Log("Bnt = " + Bnt.GetComponentInChildren<Text>().text);
-            Debug.Log("str.Insert(num - 1   " + str[num-1]);
-            Debug.Log("num = " + num);
-
+            str += Bnt.GetComponentInChildren<Text>().text; 
         }
         if (GameHeader.NeedToTrns)//if we use diffrent Tokens=> if Tokens!= X O @ &
         {
             foreach (string key in GameHeader.TokenTrns.Keys)
                 str.Replace(key, GameHeader.TokenTrns[key]);
         }
-        Debug.Log("GetBoard()==============================str = " + str);
         return str;
     }
 
@@ -171,6 +204,34 @@ public class GameMaster : MonoBehaviour {
         GameHeader.SetNextPlayerToken();
         Tt.text = SetNextPlayerText();
 
+
+    }
+
+   
+    
+    public bool StrAndSter(string a,string b,int index)//is a&b=B
+    {
+        string STemp ="";
+        
+        for (int i = 0; i < index; i++)
+        {
+            if(a[i]==b[i])
+            {
+                STemp += a[i];
+            }
+            else
+            {
+                STemp += "_";
+            }
+        }
+        if (a.Equals(STemp))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
 
     }
 

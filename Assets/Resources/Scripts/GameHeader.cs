@@ -13,7 +13,7 @@ public class GameHeader : MonoBehaviour {
     public static int CurrentTurn { set; get; }
     public static string Borad { set; get; }
     public static int BoradSize { set; get; }
-    public static Dictionary<string,List<BitArray>> WinGeneSet { get; set; }//key=token,vale = bitarray
+    public static List<string> WinGeneSet { get; set; }//key=token,vale = bitarray
     public static Dictionary<string, string> TokenTrns;
     public static string[] Tokens{ set; get; }
     public static string Win { set; get; }
@@ -27,16 +27,16 @@ public class GameHeader : MonoBehaviour {
     {
         //general setup for a game(3X3)
         CurrentToken = "X";
-        WinGeneSet = new Dictionary<string, List<BitArray>>(4);
+        WinGeneSet = new List<string>();
         Tokens = new string[4];
         Tokens[0] = "X";
-        WinGeneSet.Add("X", new List<BitArray>());
+      //  WinGeneSet.Add("X", new List<BitArray>());
         Tokens[1] = "O";
-        WinGeneSet.Add("O", new List<BitArray>());
+        //WinGeneSet.Add("O", new List<BitArray>());
         Tokens[2] = "@";
-        WinGeneSet.Add("@", new List<BitArray>());
+       // WinGeneSet.Add("@", new List<BitArray>());
         Tokens[3] = "&";
-        WinGeneSet.Add("&", new List<BitArray>());
+        //WinGeneSet.Add("&", new List<BitArray>());
         Debug.Log("Tokens" + Tokens);
         Debug.Log("WinGeneSet" + WinGeneSet);
         numPlayers = 2;

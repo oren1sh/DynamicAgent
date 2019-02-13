@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -30,6 +31,8 @@ public class StateController {
     public StateController()
     {
         WinStates = new List<State>();
+        NewStates = new List<State>();
+        States = new List<State>();
         //set up the bitarray
         BitX = new BitArray(GameHeader.BoradSize * GameHeader.BoradSize);
         BitO = new BitArray(GameHeader.BoradSize * GameHeader.BoradSize);
@@ -41,6 +44,11 @@ public class StateController {
         Debug.Log("BitO " + BitO.Length);
         Debug.Log("BitA " + BitA.Length);
         Debug.Log("BitAND " + BitAND.Length);
+
+
+    }
+    public void AddState()
+    {
 
 
     }
@@ -76,33 +84,51 @@ public class StateController {
 
     public void AddWinGene(string WinStr,string Token)//add a win state from control to Header
     {
-        if(EmptyStr == WinStr)
+        if (EmptyStr == WinStr)
         {
             Debug.Log("EmptyStr == WinStr");
             return;
         }
-        string DebugStr ="";
-        int i = 0;
-        foreach (char t in WinStr)
+        foreach (string WinS in GameHeader.WinGeneSet)
         {
-            //Debug.Log(" i = " + i);
-            //Debug.Log(" t = " + t + "Token = " + Token + "t.Equals(char.Parse(Token)) = " + t.Equals(char.Parse(Token)));
-            BitX[i] = t.Equals(char.Parse(Token));
-            DebugStr += t.Equals(char.Parse(Token));
-            DebugStr += "-";
-            i++;
+            if(StrAndSter(WinS, WinStr,WinS.Length))
+            {
+                Debug.Log("WinStr already exicte");
+                return;
+            }
         }
+        Debug.Log($"adding {WinStr} to WinGeneSet");
+        GameHeader.WinGeneSet.Add(new String(WinStr.ToCharArray()));
+        Debug.Log($"WinGeneSet in new at {GameHeader.WinGeneSet.Count} Count");
 
-        if (!GameHeader.WinGeneSet[Token].Exists(x => BitArrayComp(x, BitX)))
-        {
-            
-            GameHeader.WinGeneSet[Token].Add(new BitArray(BitX));
-            SetSaveDate(WinStr, Token, BitX);
-            Debug.Log("GameHeader.WinGeneSet[Token].Count " + GameHeader.WinGeneSet[Token].Count);
+        
+        //if(EmptyStr == WinStr)
+        //{
+        //    Debug.Log("EmptyStr == WinStr");
+        //    return;
+        //}
+        //string DebugStr ="";
+        //int i = 0;
+        //foreach (char t in WinStr)
+        //{
+        //    //Debug.Log(" i = " + i);
+        //    //Debug.Log(" t = " + t + "Token = " + Token + "t.Equals(char.Parse(Token)) = " + t.Equals(char.Parse(Token)));
+        //    BitX[i] = t.Equals(char.Parse(Token));
+        //    DebugStr += t.Equals(char.Parse(Token));
+        //    DebugStr += "-";
+        //    i++;
+        //}
 
-        }
+        ////if (!GameHeader.WinGeneSet[Token].Exists(x => BitArrayComp(x, BitX)))
+        ////{
 
-        BitX.SetAll(false);//reset the bitarray
+        ////    GameHeader.WinGeneSet[Token].Add(new BitArray(BitX));
+        ////    SetSaveDate(WinStr, Token, BitX);
+        ////    Debug.Log("GameHeader.WinGeneSet[Token].Count " + GameHeader.WinGeneSet[Token].Count);
+
+        ////}
+
+        //BitX.SetAll(false);//reset the bitarray
     }
 
     int tok;
@@ -195,6 +221,33 @@ public class StateController {
         BitAND.SetAll(false);
 
         return DicToRet;
+
+    }
+
+
+    private bool StrAndSter(string WinS, string b, int index)//is a&b=B
+    {
+        string STemp = "";
+
+        for (int i = 0; i < index; i++)
+        {
+            if (WinS[i] == b[i])
+            {
+                STemp += WinS[i];
+            }
+            else
+            {
+                STemp += "_";
+            }
+        }
+        if (WinS.Equals(STemp))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
 
     }
 

@@ -73,7 +73,7 @@ public class ControlComScript : MonoBehaviour {
     {
         Debug.Log("OnOk");
 
-        Json.SaveWinState();
+        //Json.SaveWinState();
 
     }
 
@@ -136,12 +136,13 @@ public class ControlComScript : MonoBehaviour {
 
     private void LoadGene()
     {
+        //TODO: fix or delete
        
         if (CurrnetListOfBit.Count == null)
         {
             try
             {
-                CurrnetListOfBit = GameHeader.WinGeneSet[GameHeader.CurrentToken];
+                //CurrnetListOfBit = GameHeader.WinGeneSet[GameHeader.CurrentToken];
                 foreach (BitArray bit in CurrnetListOfBit)
                 {
                     Debug.Log("bit " + bit.Count);
