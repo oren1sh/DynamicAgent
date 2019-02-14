@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Firebase;
+using Firebase.Database;
+using Firebase.Unity.Editor;
+using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +14,7 @@ using UnityEngine;
 /// </summary>
 public class EdgeController
 {
-    public List<Edge> AllEdges;
+    public static List<Edge> AllEdges;
     public static List<Edge> CheckEdges;
     public List<Edge> NewEdges;
     public Dictionary<int, List<Edge>> EdgeByLayer;
@@ -73,30 +77,7 @@ public class EdgeController
 
     }
 
-    FireSupport fireSupport = new FireSupport();
-
-    public void AddNewEdge(string Id, string Sfrom, int fromlayer)
-    {
-        Debug.Log("AddNewEdge");
-        foreach (Edge item in AllEdges)
-        {
-            if(item.Id == Id)
-            {
-                Debug.Log("edge with id: " + Id + "already exict");
-                return;
-            }
-        }
-        ETemp = new Edge();
-        ETemp.Id = Id;
-        ETemp.Sfrom = Sfrom;
-        ETemp.fromlayer = fromlayer;
-
-        NewEdges.Add(ETemp);
-
-        //bnt-token-fromlayer
-        //JsonManager.SerializeEdgeData(NewEdges);
-        fireSupport.SaveNewEdge(ETemp);
-    }
+    
     public string MakeEdgeId(string ButtonName)
     {
         Debug.Log("MakeEdgeId");
@@ -111,6 +92,102 @@ public class EdgeController
         ETemp = new Edge(Id, Sfrom, Sto, fromlayer);
 
         //bnt-token-fromlayer
+
+    }
+    FireSupport fireSupport = new FireSupport();
+
+    public void AddNewEdge(string Id, string Sfrom, int fromlayer)
+    {
+        Debug.Log("AddNewEdge");
+        foreach (Edge item in AllEdges)
+        {
+            if (item.Id == Id)
+            {
+                Debug.Log("edge with id: " + Id + "already exict");
+                return;
+            }
+        }
+        ETemp = new Edge();
+        ETemp.Id = Id;
+        ETemp.Sfrom = Sfrom;
+        ETemp.fromlayer = fromlayer;
+
+        NewEdges.Add(ETemp);
+
+        SaveNewEdge(ETemp);
+        //bnt-token-fromlayer
+        //JsonManager.SerializeEdgeData(NewEdges);
+        //fireSupport.SaveNewEdge(ETemp);
+    }
+
+
+    string key;
+
+    public void SaveNewEdge(Edge edge)
+    {
+        // Set this before calling into the realtime database.
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
+
+
+        // Get the root reference location of the database.
+        DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
+        key = mDatabaseRef.Child($"BoardSize:{GameHeader.BoradSize}").Child("Edges").Push().Key;
+        Edge ETemp = new Edge(edge);
+        string Stemp = ETemp.ToString();
+
+        //key = edge.Id;
+
+        string json = JsonConvert.SerializeObject(ETemp);
+
+        Debug.Log("json==" + json);
+
+        mDatabaseRef.Child("BoardSize").Child(ETemp.BoardSize.ToString())
+            .Child("Edges").Child(ETemp.Id).SetRawJsonValueAsync(json);
+
+        //mDatabaseRef.SetValueAsync($"BoardSize/{GameHeader.BoradSize.ToString()} " +
+        //    $"Layer/{ETemp.fromlayer.ToString()}" +
+        //    $"ID/{ETemp.Id}" , json);
+        /*
+         "BoardSize" : [ {
+                 "Layer" : [ {
+                        "ID" : {
+                            "1-X-0" : {
+         */
+
+    }
+
+    public void LoadEdgeLists()
+    {
+        int boardSize = GameHeader.BoradSize;
+        int TargetLayer = GameHeader.CurrentTurn;
+        //AllEdges;
+        //CheckEdges;
+        //NewEdges;
+        //EdgeByLayer;
+        // Set this before calling into the realtime database.
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
+
+
+        // Get the root reference location of the database.
+        DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
+
+        FirebaseDatabase.DefaultInstance
+                    .GetReference("BoardSize").Child(boardSize.ToString()).Child("Edges")
+                    .GetValueAsync().ContinueWith(task => {
+                                  if (task.IsFaulted)
+                                  {
+                                          // Handle the error...
+                                      }
+                                  else if (task.IsCompleted)
+                                  {
+                                      DataSnapshot snapshot = task.Result;
+                            Debug.Log("we get that from dataBase === "+snapshot.ToString());
+                            // Do something with snapshot...
+
+                        }
+                              });
+
+
 
     }
 

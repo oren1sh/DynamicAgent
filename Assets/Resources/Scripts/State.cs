@@ -11,6 +11,7 @@ public class State{
     public int BoardSize { set; get; }
     public int Layer { set; get; }
     public List<string> Edges { set; get; }
+    
     //public BitArray[] GeneSet { set; get; }
 
     //public BitArray GeneSetX { set; get; }

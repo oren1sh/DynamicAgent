@@ -13,13 +13,14 @@ public class MenuScript : MonoBehaviour {
     public GameObject MainPanel;
     public GameObject settingsPanel;
     public GameObject SyncPanel;
-
+    public GameMaster gameMaster;
 
 
     // Use this for initialization
     void Start () {
-		
-	}
+        gameMaster = GameObject.Find("GameMaster").GetComponent<GameMaster>();
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -43,6 +44,10 @@ public class MenuScript : MonoBehaviour {
     public void OnStartNewGame()
     {
         Debug.Log("OnStartNewGame");
+       // gameMaster.SetCpuPlayer();
+        MainPanel.SetActive(false);
+        Board3.SetActive(true);
+        GameHeader.OnEditWin = false;
 
 
     }

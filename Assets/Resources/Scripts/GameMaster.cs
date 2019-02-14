@@ -16,14 +16,15 @@ public class GameMaster : MonoBehaviour {
     private Text[] TtB;// = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
 
     public List<Button> Buttons;
-    public Dictionary<string, Button> StrToBnt;
+    public static Dictionary<string, Button> StrToBnt;
     public bool BEnd;
 
     public string PrevState;
     public string CurrnetState;
 
+    CpuPlayer cpuPlayer;
 
-
+    Button temp;
     // Use this for initialization
     void Start () {
         stateController = new StateController();
@@ -31,10 +32,18 @@ public class GameMaster : MonoBehaviour {
         Tt = TBoard.GetComponentInChildren<Text>();//get board header
         Buttons = TBoard.GetComponentsInChildren<Button>().ToList();//get currnet board buttons
         Dictionary<string, Button> StrToBnt = new Dictionary<string, Button>();
+        
         foreach (Button bnt in Buttons)
         {
-            StrToBnt.Add(bnt.name.Replace("Button-", ""), bnt);//set the dic
+            if((bnt.name == "ButtonBackMenu"))
+                {
+                temp = bnt;
+                 }
+            Button bnt2 = new Button;
+            StrToBnt.Add(bnt.name.Replace("Button-", ""),bnt);//set the dic
+
         }
+        Buttons.Remove(temp);
         TtB = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
         Debug.Log("GameHeader.BoradSize  == " + GameHeader.BoradSize);
         Debug.Log("TtB size  == " + TtB.Length);
@@ -43,6 +52,8 @@ public class GameMaster : MonoBehaviour {
 
 
         SetBoard();//reset the board
+
+        SetCpuPlayer();
 
     }
 
@@ -61,6 +72,10 @@ public class GameMaster : MonoBehaviour {
 
 		
 	}
+    public static void OnCpuPress(Button Bnt)//,,like end of turn''
+    {
+        
+    }
 
     public void OnPress(Button Bnt)//,,like end of turn''
     {
@@ -88,25 +103,36 @@ public class GameMaster : MonoBehaviour {
         }
         GameHeader.Borad = GetBoard();//get board
         
+        Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;//puts the Token
 
+        
+
+
+
+
+        //CurrnetState = GetBoard();
+
+        OnEndTurn();
 
         if (GameHeader.CurrentToken != "X")//if not human player
         {
-
+            cpuPlayer.PlayTurn();
         }
 
 
-        
-        Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;//puts the Token
 
-        CurrnetState = GetBoard();
-
-        
         //check if new state
         //check if new edge
 
-        
 
+
+    }
+
+
+
+    public void SetCpuPlayer()
+    {
+        cpuPlayer = new CpuPlayer(GameHeader.Tokens[1], "", "");
     }
 
 

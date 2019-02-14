@@ -18,6 +18,8 @@ public class StateController {
 
     public Dictionary<int, List<State>> DicByLayer;
 
+    public static Dictionary<string, List<string>> StateToEdges;
+
     private List<bool> BoolListX;
     private List<bool> BoolListO;
     private List<bool> BoolListA;
