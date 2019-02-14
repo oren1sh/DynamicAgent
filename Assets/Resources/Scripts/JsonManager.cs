@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Security.AccessControl;
 
 public class JsonManager : MonoBehaviour
 {
@@ -62,19 +63,29 @@ public class JsonManager : MonoBehaviour
         SerializeStateData();
 
     }
-
-    
+     static bob bob1;
+    static FileStream fileStream;
     public static void SerializeEdgeData(List<Edge> NewEdges)
     {
+        bob1 = new bob();
         string pathEdgedata;
         foreach (Edge edge in NewEdges)
         {
-            File.Create(Application.streamingAssetsPath + @"\saved files\");
-            pathEdgedata = Path.Combine(Application.streamingAssetsPath + @"\saved files\", @"" + edge.Id + ".json");
+            bob1.Id = edge.Id;
+            bob1.Sfrom = edge.Sfrom;
+            bob1.Sto = edge.Sto;
+
+            pathEdgedata = Directory.CreateDirectory(Application.streamingAssetsPath + @"/saved files" ).FullName;
+            //File.Create(Application.streamingAssetsPath + @" / saved files");
+            //pathEdgedata = Path.Combine(Application.streamingAssetsPath + @"/saved files");//, @"" + bob1 + ".json");
             Debug.Log("path is ="+ pathEdgedata);
             Debug.Log("edge.Id is =" + edge.Id);
-            File.Create(pathEdgedata);
-            string jsonDataString = JsonUtility.ToJson(edge.Id);
+            //File.Create(pathEdgedata + @"/" + bob1.Id + ".txt");
+            Debug.Log("File.Create" + File.Create(pathEdgedata + @"/" + bob1.Id + ".txt"));
+            File.SetAttributes(pathEdgedata, FileAttributes.Normal);
+            //File.WriteAllText(pathEdgedata, bob1.ToString());
+            //File.Create(pathEdgedata);
+            string jsonDataString = JsonUtility.ToJson(edge.ToString());
             Debug.Log(jsonDataString);
             File.WriteAllText(pathEdgedata, jsonDataString);
 
@@ -109,5 +120,13 @@ public class JsonManager : MonoBehaviour
 
         Debug.Log("Statedata: " + Statedata.Capacity + " | Statedata.Count: " + Statedata.Count);
     }
+}
+[Serializable]
+public class bob
+{
+    public string Id { get; set; }//bnt-token-fromlayer
+    public string Sfrom { get; set; }
+    public string Sto { get; set; }
+
 }
 

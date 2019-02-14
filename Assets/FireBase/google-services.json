@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "684384779391",
+    "firebase_url": "https://dynamicagent-681fa.firebaseio.com",
+    "project_id": "dynamicagent-681fa",
+    "storage_bucket": "dynamicagent-681fa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684384779391:android:8296cc0fdab82d32",
+        "android_client_info": {
+          "package_name": "com.TickNTac.DynamicAgent"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "684384779391-59647d8kvu66h5jc6dh2rhqph7ft9v3i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEohWD7uloXwhjctlXliUAw1f_9547Gew"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

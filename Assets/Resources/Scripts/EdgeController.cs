@@ -73,6 +73,8 @@ public class EdgeController
 
     }
 
+    FireSupport fireSupport = new FireSupport();
+
     public void AddNewEdge(string Id, string Sfrom, int fromlayer)
     {
         Debug.Log("AddNewEdge");
@@ -92,7 +94,8 @@ public class EdgeController
         NewEdges.Add(ETemp);
 
         //bnt-token-fromlayer
-        JsonManager.SerializeEdgeData(NewEdges);
+        //JsonManager.SerializeEdgeData(NewEdges);
+        fireSupport.SaveNewEdge(ETemp);
     }
     public string MakeEdgeId(string ButtonName)
     {

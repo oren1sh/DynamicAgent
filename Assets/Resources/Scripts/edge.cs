@@ -9,12 +9,12 @@ public class Edge{
     public string Id { get; set; }//bnt-token-fromlayer
     public string Sfrom { get; set; }
     public string Sto { get; set; }
-    public int Weight { get; set; }
-    public int TotalPass { get; set; }
-    public int TotalWin { get; set; }
-    public int TotalLost { get; set; }
-    public int TotalEven { get; set; }
-    public int fromlayer { get; set; }
+    public double Weight { get; set; }
+    public double TotalPass { get; set; }
+    public double TotalWin { get; set; }
+    public double TotalLost { get; set; }
+    public double TotalEven { get; set; }
+    public double fromlayer { get; set; }
 
     [NonSerialized]
     public State From;
@@ -32,11 +32,11 @@ public class Edge{
         Id = edge.Id;
         Sfrom = edge.Sfrom;
         Sto = edge.Sto;
-        Weight = edge.Weight;
-        TotalPass = edge.TotalPass;
-        TotalWin = edge.TotalWin;
-        TotalLost = edge.TotalLost;
-        TotalEven = edge.TotalEven;
+        //Weight = edge.Weight;
+        //TotalPass = edge.TotalPass;
+        //TotalWin = edge.TotalWin;
+        //TotalLost = edge.TotalLost;
+        //TotalEven = edge.TotalEven;
         fromlayer = edge.fromlayer;
         //From = edge.From;
         //To = edge.To;
@@ -67,6 +67,28 @@ public class Edge{
     }
 
 
+  //  public override string ToString()
+  //  {
+  //      string output = "Id: " + Id + "\n";
+  //      output += "Sto: " + Sto + "\n";
+  //      output += "Sfrom: " + Sfrom + "\n";
+  //      output += "fromlayer: " + fromlayer + "\n";
+  //
+  //      return output;
+  //
+  //  }//end to string
+  //
+  //  public string ToJson()
+  //  {
+  //      string output = "Id: " + Id + "\n";
+  //      output += "Sto: " + Sto + "\n";
+  //      output += "Sfrom: " + Sfrom + "\n";
+  //      output += "fromlayer: " + fromlayer + "\n";
+  //
+  //      return output;
+  //
+  //  }//end to string
+  //
 
 
 
