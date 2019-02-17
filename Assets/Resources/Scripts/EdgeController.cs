@@ -15,7 +15,7 @@ using UnityEngine;
 public class EdgeController
 {
     public static List<Edge> AllEdges;
-    public static List<Edge> CheckEdges;
+    public List<Edge> CheckEdges;
     public List<Edge> NewEdges;
     public Dictionary<int, List<Edge>> EdgeByLayer;
 
@@ -80,13 +80,68 @@ public class EdgeController
     
     public string MakeEdgeId(string ButtonName)
     {
-        Debug.Log("MakeEdgeId");
+        //Debug.Log("MakeEdgeId");
         STemp = "";
         STemp = $"{ButtonName}-{GameHeader.CurrentToken}-{GameHeader.CurrentTurn}";
         return STemp;
 
     }
+    public void UpdateAllCheckedEdges()
+    {
+        // Set this before calling into the realtime database.
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
+        DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
+        Dictionary<string, System.Object> childUpdates = new Dictionary<string, System.Object>();
+        bool check = true;
+        for (int i = 0; i < CheckEdges.Count; i++, check = true)
+        {
 
+            if (GameHeader.Win.Equals("no")&&check)//teko
+            {
+                CheckEdges[i].TotalEven++;
+                CheckEdges[i].TotalPass++;
+                CheckEdges[i].Weight++;
+                check=false;//go to next edge
+            }
+            if (CheckEdges[i].Id.Split('-')[1].Equals(GameHeader.Win)&&check)//wins
+            {
+                CheckEdges[i].TotalWin++;
+                CheckEdges[i].TotalPass++;
+                CheckEdges[i].Weight--;
+                check=false;
+            }
+            if (!CheckEdges[i].Id.Split('-')[1].Equals(GameHeader.Win)&&check)//loose
+            {
+                CheckEdges[i].TotalLost++;
+                CheckEdges[i].TotalPass++;
+                CheckEdges[i].Weight+=2;
+                check=false;
+            }
+
+
+            //update in database:
+            string key = mDatabaseRef.Child("BoardSize")
+                .Child("" + GameHeader.BoradSize).Child("Layers")
+                .Child(CheckEdges[i].fromlayer.ToString())
+                .Child("States")
+                .Child(CheckEdges[i].Sfrom)
+                .Child("Edges")
+                .Child(CheckEdges[i].Id).Key;
+            Edge entry = CheckEdges[i];
+            Dictionary<string, System.Object> entryValues = entry.ToDictionary();
+
+            string dicKey = "BoardSize/" + GameHeader.BoradSize.ToString() + "/Layers/" + entry.fromlayer.ToString() + "/States/" + entry.Sfrom + "/Edges/";
+            Debug.Log("add the key " + dicKey);
+            childUpdates.Add(dicKey + key,entryValues);
+
+        }
+        Debug.Log("update in DB:");
+        foreach (KeyValuePair<string, System.Object> keyValuePair in childUpdates)
+            Debug.Log("key ===" + keyValuePair.Key + " value ===== wait for it");
+        //update all the dictionary
+         mDatabaseRef.UpdateChildrenAsync(childUpdates);
+
+    }
     private void AddEdge(string Id, string Sfrom, string Sto, int fromlayer)
     {
         ETemp = new Edge(Id, Sfrom, Sto, fromlayer);
@@ -94,32 +149,46 @@ public class EdgeController
         //bnt-token-fromlayer
 
     }
-    FireSupport fireSupport = new FireSupport();
+    //FireSupport fireSupport = new FireSupport();
 
-    public void AddNewEdge(string Id, string Sfrom, int fromlayer)
+    public Edge AddNewEdge(string Id, string Sfrom, int fromlayer)
     {
-        Debug.Log("AddNewEdge");
-        foreach (Edge item in AllEdges)
-        {
-            if (item.Id == Id)
-            {
-                Debug.Log("edge with id: " + Id + "already exict");
-                return;
-            }
-        }
+
         ETemp = new Edge();
         ETemp.Id = Id;
         ETemp.Sfrom = Sfrom;
         ETemp.fromlayer = fromlayer;
+        ETemp.Weight = (GameHeader.BoradSize * GameHeader.BoradSize);
+        NewEdges.Add(ETemp);//add to my list
 
-        NewEdges.Add(ETemp);
+        SaveNewEdge(ETemp);//add to database
 
-        SaveNewEdge(ETemp);
-        //bnt-token-fromlayer
-        //JsonManager.SerializeEdgeData(NewEdges);
-        //fireSupport.SaveNewEdge(ETemp);
+        return ETemp;
     }
-
+    public Edge GetEdgeInLayer(string edgeID,int layer)
+    {
+        List<State> states = new List<State>();
+        Debug.Log("looking for layer " + layer + " in the dic");
+        foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
+            Debug.Log(kv.Key+" * **---*** " + "cntt = " + kv.Value.Count);
+        Debug.Log("--------------------end of dic -------------");
+        //if(stateController.DicByLayer.ContainsKey(layer))
+            states = GameHeader.DicByLayer[layer];//get states in layer
+        Debug.Log("states in layer " + layer + " === " + states.Count);
+        Edge output;
+        foreach (State state in states)//check in all states if they have the edge
+        {
+            //Debug.Log("state === " + state.Id + " and list of edges === ");
+            foreach (Edge e in state.Edges)
+                Debug.Log(e.Id + "=?" + edgeID);
+            //Debug.Log("===============================================");
+            
+            output = state.Edges.Find(e => e.Id.Equals(edgeID));
+            if (output != null)//edge found
+                return output;
+        }
+        return null;
+    }
 
     string key;
 
@@ -131,7 +200,7 @@ public class EdgeController
 
         // Get the root reference location of the database.
         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
-        key = mDatabaseRef.Child($"BoardSize:{GameHeader.BoradSize}").Child("Edges").Push().Key;
+        //key = mDatabaseRef.Child($"BoardSize:{GameHeader.BoradSize}").Child("Edges").Push().Key;
         Edge ETemp = new Edge(edge);
         string Stemp = ETemp.ToString();
 
@@ -139,9 +208,9 @@ public class EdgeController
 
         string json = JsonConvert.SerializeObject(ETemp);
 
-        Debug.Log("json==" + json);
-
-        mDatabaseRef.Child("BoardSize").Child(ETemp.BoardSize.ToString())
+        //Debug.Log("json==" + json);
+        string guid = Guid.NewGuid().ToString();
+        mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn).ToString()).Child("States").Child(GameHeader.Borad)
             .Child("Edges").Child(ETemp.Id).SetRawJsonValueAsync(json);
 
         //mDatabaseRef.SetValueAsync($"BoardSize/{GameHeader.BoradSize.ToString()} " +
@@ -156,40 +225,40 @@ public class EdgeController
 
     }
 
-    public void LoadEdgeLists()
-    {
-        int boardSize = GameHeader.BoradSize;
-        int TargetLayer = GameHeader.CurrentTurn;
-        //AllEdges;
-        //CheckEdges;
-        //NewEdges;
-        //EdgeByLayer;
-        // Set this before calling into the realtime database.
-        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
+    /* public void LoadEdgeLists()
+     {
+         int boardSize = GameHeader.BoradSize;
+         int TargetLayer = GameHeader.CurrentTurn;
+         //AllEdges;
+         //CheckEdges;
+         //NewEdges;
+         //EdgeByLayer;
+         // Set this before calling into the realtime database.
+         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
 
 
-        // Get the root reference location of the database.
-        DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
+         // Get the root reference location of the database.
+         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
 
-        FirebaseDatabase.DefaultInstance
-                    .GetReference("BoardSize").Child(boardSize.ToString()).Child("Edges")
-                    .GetValueAsync().ContinueWith(task => {
-                                  if (task.IsFaulted)
-                                  {
-                                          // Handle the error...
-                                      }
-                                  else if (task.IsCompleted)
-                                  {
-                                      DataSnapshot snapshot = task.Result;
-                            Debug.Log("we get that from dataBase === "+snapshot.ToString());
-                            // Do something with snapshot...
+         FirebaseDatabase.DefaultInstance
+                     .GetReference("BoardSize").Child(boardSize.ToString()).Child("Edges")
+                     .GetValueAsync().ContinueWith(task => {
+                                   if (task.IsFaulted)
+                                   {
+                                           // Handle the error...
+                                       }
+                                   else if (task.IsCompleted)
+                                   {
+                                       DataSnapshot snapshot = task.Result;
+                             Debug.Log("we get that from dataBase === "+snapshot.ToString());
+                             // Do something with snapshot...
 
-                        }
-                              });
+                         }
+                               });
 
 
 
-    }
+     }*/
 
 
 

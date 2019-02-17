@@ -30,6 +30,26 @@ public class Edge{
 
     }
 
+
+    public Dictionary<string, System.Object> ToDictionary()
+    {
+        Dictionary<string, System.Object> result = new Dictionary<string, System.Object>();
+        result["Id"] = Id;
+        result["Sfrom"] = Sfrom;
+        result["Sto"] = Sto;
+        result["Weight"] = Weight;
+        result["TotalPass"] = TotalPass;
+        result["TotalWin"] = TotalWin;
+        result["TotalLost"] = TotalLost;
+        result["TotalEven"] = TotalEven;
+        result["fromlayer"] = fromlayer;
+        result["BoardSize"] = BoardSize;
+
+
+
+        return result;
+    }
+
     public Edge(Edge edge)
     {
         Id = edge.Id;
@@ -136,4 +156,7 @@ public class Edge{
 
 
 
-}             
+}
+public class EdgeRoot {
+    public Edge Edge { get; set; }
+}

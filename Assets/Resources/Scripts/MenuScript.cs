@@ -43,7 +43,7 @@ public class MenuScript : MonoBehaviour {
 
     public void OnStartNewGame()
     {
-        Debug.Log("OnStartNewGame");
+        //Debug.Log("OnStartNewGame");
        // gameMaster.SetCpuPlayer();
         MainPanel.SetActive(false);
         Board3.SetActive(true);
@@ -53,14 +53,14 @@ public class MenuScript : MonoBehaviour {
     }
     public void OnEditWinState()
     {
-        Debug.Log("OnEditWinState");
+        //Debug.Log("OnEditWinState");
         settingsPanel.SetActive(false);
         HeadText.SetActive(false);
         ControlCom.SetActive(true);
         HeadTextCom.SetActive(true);
         Board3.SetActive(true);
         GameHeader.OnEditWin = true;
-        Debug.Log(" GameHeader.OnEditWin " + GameHeader.OnEditWin);
+        //Debug.Log(" GameHeader.OnEditWin " + GameHeader.OnEditWin);
     }
     public void OnSettings()
     {

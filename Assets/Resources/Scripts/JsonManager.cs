@@ -16,7 +16,7 @@ public class JsonManager : MonoBehaviour
 
     public void Start()
     {
-        Debug.Log("Application.streamingAssetsPath== " + Application.streamingAssetsPath);
+        //Debug.Log("Application.streamingAssetsPath== " + Application.streamingAssetsPath);
         Statedata = new List<State>();
         Edgedata = new List<Edge>();
         //data = new JsonData(1, "Alfred Jodl");
@@ -50,19 +50,7 @@ public class JsonManager : MonoBehaviour
     //    Debug.Log("id: " + data.id.ToString() + " | name: " + data.name);
     //}
 
-    public void SaveWinState()
-    {
-        Debug.Log(" SaveWinState() " + StateController.WinStates.ToList<State>());
-        foreach (State item in StateController.WinStates)
-        {
-            Statedata.Add(new State(item));
-
-        }
-        pathStatedata = Path.Combine(Application.streamingAssetsPath, "StateWindata.json");
-
-        SerializeStateData();
-
-    }
+    
      static bob bob1;
     static FileStream fileStream;
     public static void SerializeEdgeData(List<Edge> NewEdges)
@@ -110,16 +98,7 @@ public class JsonManager : MonoBehaviour
         
     }
 
-    public void DeserializeStateData()
-    {
-        string loadedJsonDataString = File.ReadAllText(pathStatedata);
-
-        Statedata.Add(new State(JsonUtility.FromJson<State>(loadedJsonDataString)));
-
-        Debug.Log("Statedata: " + Statedata.Capacity + " | Statedata.Count: " + Statedata.Count);
-
-        Debug.Log("Statedata: " + Statedata.Capacity + " | Statedata.Count: " + Statedata.Count);
-    }
+    
 }
 [Serializable]
 public class bob

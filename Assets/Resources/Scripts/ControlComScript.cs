@@ -58,12 +58,13 @@ public class ControlComScript : MonoBehaviour {
 
     public void OnSet()
     {
+        //TODO: save win state to database
         Debug.Log("OnSet");
         WinState = Master.GetBoard();
         Debug.Log("WinState " + WinState);
-        Master.SetBoard();//clean board
+       
         stateController.AddWinGene(WinState, GameHeader.CurrentToken);
-        WinState.Remove(0);
+        Master.SetBoard();//clean board
 
         next.interactable = true;
         prev.interactable = true;
