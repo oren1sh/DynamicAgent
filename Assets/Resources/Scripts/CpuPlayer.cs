@@ -36,7 +36,7 @@ public class CpuPlayer
             return null;
         }
 
-        Debug.Log("cpuPlayer.PlayTurn()");
+        //Debug.Log("cpuPlayer.PlayTurn()");
         GameMaster = GameObject.Find("GameMaster").GetComponent<GameMaster>();
         //Debug.Log("PlayTurn()");
         //TargetsOfOptinity.Clear();
@@ -84,15 +84,15 @@ public class CpuPlayer
                             min = E;
                         TargetsOfOptinity.Remove(int.Parse(E.Id[0].ToString()));
                     }
-                    Debug.Log("min.Id[0] " + min.Id[0]);
+                    //Debug.Log("min.Id[0] " + min.Id[0]);
                     if (TheStates.Edges.Count >= ((GameHeader.BoradSize*GameHeader.BoradSize)-GameHeader.CurrentTurn))
                     {
                         //TargetsOfOptinity.Contains(int.Parse(min.Id[0].ToString()));
                         return GameMaster.Buttons[int.Parse(min.Id[0].ToString())];
                     }
                     index = Random.Range(0, TargetsOfOptinity.Count);
-                    Debug.Log("TargetsOfOptinity[index] == " + TargetsOfOptinity[index]);
-                    Debug.Log("[index] == " + index);
+                    //Debug.Log("TargetsOfOptinity[index] == " + TargetsOfOptinity[index]);
+                    //Debug.Log("[index] == " + index);
                     return GameMaster.Buttons[TargetsOfOptinity[index]];
                 }
             }//end if DicByLayer have the layer
@@ -100,8 +100,8 @@ public class CpuPlayer
         }//end if DicByLayer has something
 
         index = Random.Range(0, TargetsOfOptinity.Count);
-        Debug.Log("TargetsOfOptinity[index] == " + TargetsOfOptinity[index]);
-        Debug.Log("[index] == " + index);
+        //Debug.Log("TargetsOfOptinity[index] == " + TargetsOfOptinity[index]);
+        //Debug.Log("[index] == " + index);
         return GameMaster.Buttons[TargetsOfOptinity[index]];
 
 

@@ -31,7 +31,6 @@ public class GameHeader : MonoBehaviour {
     public static string LastState=null;
     [ThreadStatic]
     public static Dictionary<int, List<State>> DicByLayer;
-    public const string LAYERS_GLOBAL_PATH = "https://dynamicagent-681fa.firebaseio.com/BoardSize/3/Layers/";
     
     private void Awake()
     {
@@ -47,8 +46,8 @@ public class GameHeader : MonoBehaviour {
         // WinGeneSet.Add("@", new List<BitArray>());
         Tokens[3] = "&";
         //WinGeneSet.Add("&", new List<BitArray>());
-        Debug.Log("Tokens" + Tokens);
-        Debug.Log("WinGeneSet" + WinGeneSet);
+       // Debug.Log("Tokens" + Tokens);
+        //Debug.Log("WinGeneSet" + WinGeneSet);
         numPlayers = 2;
         CurrentTurn = 0;
         BoradSize = 3;
@@ -58,11 +57,11 @@ public class GameHeader : MonoBehaviour {
         Dirty = false;
         OnEditWin = false;
         NeedToTrns = false;
-        Debug.Log("numPlayers" + numPlayers);
-        Debug.Log("CurrentTurn" + CurrentTurn);
-        Debug.Log("BoradSize" + BoradSize);
-        Debug.Log("Borad" + Borad);
-        Debug.Log("BWin" + BWin);
+        //Debug.Log("numPlayers" + numPlayers);
+        //Debug.Log("CurrentTurn" + CurrentTurn);
+        //Debug.Log("BoradSize" + BoradSize);
+        //Debug.Log("Borad" + Borad);
+        //Debug.Log("BWin" + BWin);
         //end setup game
 
         //active the game
@@ -86,7 +85,7 @@ public class GameHeader : MonoBehaviour {
         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
 
             //get states from data base - in each state get the edges
-            Debug.Log("loading layer " + v);
+           // Debug.Log("loading layer " + v);
 
             //value = edges
             FirebaseDatabase.DefaultInstance
@@ -147,8 +146,8 @@ public class GameHeader : MonoBehaviour {
                     Edges = new List<Edge>(),
                     Layer = (int.Parse(valuesDic["LayerID"].ToString()))
                 };
-                foreach (KeyValuePair<string, System.Object> keyValuePair in valuesDic)
-                    Debug.Log("key in values dic ===== " + keyValuePair.Key);
+                //foreach (KeyValuePair<string, System.Object> keyValuePair in valuesDic)
+                //    Debug.Log("key in values dic ===== " + keyValuePair.Key);
                 if (!valuesDic.ContainsKey("Edges"))
                     edgesDic = new Dictionary<string, System.Object>();
                 else
@@ -173,6 +172,9 @@ public class GameHeader : MonoBehaviour {
                                 break;
                             case "Sfrom":
                                 currentEdge.Sfrom = edgeBody.Value.ToString();
+                                break;
+                            case "Sto":
+                                currentEdge.Sto = edgeBody.Value.ToString();
                                 break;
                             case "BoardSize":
                                 currentEdge.BoardSize = int.Parse(edgeBody.Value.ToString());
@@ -205,7 +207,7 @@ public class GameHeader : MonoBehaviour {
                 currentState.Edges.AddRange(edges);
                 currentV = currentState.Layer;
                 value.Add(currentState);
-                Debug.Log("layer " + currentState.Layer + " and state " + currentState.Id);
+                //Debug.Log("layer " + currentState.Layer + " and state " + currentState.Id);
                 State found;
                 if (GameHeader.DicByLayer.ContainsKey(currentState.Layer))//has this layer, add the state to the list
                 {
@@ -494,7 +496,7 @@ public class GameHeader : MonoBehaviour {
 
         if (GameHeader.DicByLayer == null)
         {
-            Debug.Log("dic is null --- suppose to be 1 time !!!");
+            //Debug.Log("dic is null --- suppose to be 1 time !!!");
             GameHeader.DicByLayer = new Dictionary<int, List<State>>();
         }
 
@@ -515,10 +517,10 @@ public class GameHeader : MonoBehaviour {
         //GetStatesForLayer();//load layer
         if (!GameHeader.DicByLayer.ContainsKey(GameHeader.CurrentTurn + 1))//load this layer
         {
-            Debug.Log("GameHeader.CurrentTurn2=====" + GameHeader.CurrentTurn);
+            //Debug.Log("GameHeader.CurrentTurn2=====" + GameHeader.CurrentTurn);
             GameHeader.GetStatesForLayer();
-            foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
-                Debug.Log(kv.Key + " 1contains " + kv.Value.Count + " 1states ");
+            //foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
+            //    Debug.Log(kv.Key + " 1contains " + kv.Value.Count + " 1states ");
         }
         CurrentToken = Tokens[CurrentTurn % numPlayers];
         

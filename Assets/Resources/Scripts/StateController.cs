@@ -97,7 +97,7 @@ public class StateController {
         foreach (var item in dic)
         {
             GameHeader.WinGeneSet.Add(item.Key);
-            Debug.Log("adding the key fuck! " + item.Key);
+            //Debug.Log("adding the key fuck! " + item.Key);
         }
 
     }//end on value changed
@@ -111,7 +111,7 @@ public class StateController {
     {
         if (string.IsNullOrEmpty(WinStr))
         {
-            Debug.Log("null == WinStr");
+            //Debug.Log("null == WinStr");
             return;
         }
         foreach (string WinS in GameHeader.WinGeneSet)

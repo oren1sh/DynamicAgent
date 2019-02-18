@@ -150,7 +150,7 @@ public class GameMaster : MonoBehaviour {
         Edge currentEdge = edgeController.GetEdgeInLayer(currentEdgeID,GameHeader.CurrentTurn);
         if (currentEdge == null)//if not exists, add new 
         {
-            Debug.Log("edge " + currentEdgeID + " is fuckin null!!!");
+            //Debug.Log("edge " + currentEdgeID + " is fuckin null!!!");
             currentEdge = edgeController.AddNewEdge(currentEdgeID, PrevState, GameHeader.CurrentTurn);
         }
         edgeController.CheckEdges.Add(currentEdge);//add to checked list
@@ -174,7 +174,7 @@ public class GameMaster : MonoBehaviour {
         }
         /*  go to other player -set other player flag ==> player   */
         GameHeader.SetNextPlayerToken();
-        Debug.Log("GameHeader.CurrentTurn1=====" + GameHeader.CurrentTurn);
+        //Debug.Log("GameHeader.CurrentTurn1=====" + GameHeader.CurrentTurn);
 
        
 

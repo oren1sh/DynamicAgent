@@ -52,7 +52,7 @@ public class MenuScript : MonoBehaviour {
         GameHeader.OnEditWin = false;
         if (GameHeader.DicByLayer == null || (GameHeader.CurrentTurn == 0 && !GameHeader.DicByLayer.ContainsKey(0)))//first play, get the layer 0's states
         {
-            Debug.Log("GameHeader.CurrentTurn==0 and i'm loading the DIC");
+            //Debug.Log("GameHeader.CurrentTurn==0 and i'm loading the DIC");
             GameHeader.GetStatesForLayer();//load 0 and 1
         }
 

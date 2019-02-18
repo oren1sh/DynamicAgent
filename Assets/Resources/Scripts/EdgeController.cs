@@ -161,7 +161,7 @@ public class EdgeController
 
     public Edge AddNewEdge(string Id, string Sfrom, int fromlayer)
     {
-        Debug.Log("old ==== " + GameHeader.Borad);
+        //Debug.Log("old ==== " + GameHeader.Borad);
 
         ETemp = new Edge();
         ETemp.Id = Id;
@@ -169,7 +169,7 @@ public class EdgeController
         newBoard[int.Parse(Id[0].ToString())] = Id[2];
         string newBoard2 = newBoard.ToString();      
         
-        Debug.Log("the new one will be    ====      " + newBoard2);
+        //Debug.Log("the new one will be    ====      " + newBoard2);
         ETemp.Sto = newBoard2;
         ETemp.Sfrom = Sfrom;
         
