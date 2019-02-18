@@ -4,7 +4,10 @@ using Firebase.Unity.Editor;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using Newtonsoft.Json;
+using System.Linq;
 
 public class GameHeader : MonoBehaviour {
 
@@ -25,7 +28,11 @@ public class GameHeader : MonoBehaviour {
     public static bool OnEditWin { get; set; }
     public static bool NeedToTrns { get; set; }
     public static bool Dirty { get; set; }
+    public static string LastState=null;
+    [ThreadStatic]
     public static Dictionary<int, List<State>> DicByLayer;
+    public const string LAYERS_GLOBAL_PATH = "https://dynamicagent-681fa.firebaseio.com/BoardSize/3/Layers/";
+    
     private void Awake()
     {
         //general setup for a game(3X3)
@@ -62,126 +69,157 @@ public class GameHeader : MonoBehaviour {
         SceneObjects.SetActive(true);
         //
     }
-
-
     public static void GetStatesForLayer()
     {
+        int v = GameHeader.CurrentTurn;
 
-        
+
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
 
         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
-        //key = states
-        for (int v = 0; v < 9; v++)
-        {
+
             //get states from data base - in each state get the edges
             Debug.Log("loading layer " + v);
-            List<State> value = new List<State>();
-            State currentState;
 
-  
             //value = edges
             FirebaseDatabase.DefaultInstance
           .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").Child("" + v).Child("States")
-          .GetValueAsync().ContinueWith(task => {
-              if (task.IsFaulted)
-              {
-                  Debug.Log("i'm a total fail no database task!!");
-                  // Handle the error...
-              }
-              else if (task.IsCompleted)
-              {
-                  DataSnapshot snapshot = task.Result;
-
-                  Dictionary<string, object> dic = (Dictionary<string, object>)snapshot.Value;
-                  // Debug.Log("dic size ==== " + dic.Count);
-                 // foreach (KeyValuePair<string, object> keyValuePair in dic)
-                 //     Debug.Log(keyValuePair.Key);
-                  Dictionary<string, object> edgesDic;
-                  List<Edge> edges = new List<Edge>();
-                  Edge currentEdge;
-                  foreach (KeyValuePair<string, System.Object> item in dic)
-                  {
-
-                      edgesDic = (Dictionary<string, System.Object>)item.Value;
-                      currentState = new State
-                      {
-                          Id = item.Key,
-                          Edges = new List<Edge>()
-                      };
-
-                      edgesDic = (Dictionary<string, System.Object>)edgesDic["Edges"];
-
-                      //foreach (KeyValuePair<string, System.Object> keyValuePair in edgesDic)
-                      //    Debug.Log(keyValuePair.Key);
-                      foreach (KeyValuePair<string, System.Object> keyValue in edgesDic)
-                      {
-                          Dictionary<string, System.Object> currentEdgeDB = new Dictionary<string, System.Object>();
-
-                          currentEdgeDB = (Dictionary<string, System.Object>)keyValue.Value;
-
-                          currentEdge = new Edge { };
-
-                          foreach (KeyValuePair<string, System.Object> edgeBody in currentEdgeDB)
-                          {
-                              //Debug.Log(edgeBody.Key + ": " + edgeBody.Value.ToString());
-                              switch (edgeBody.Key)
-                              {
-                                  case "Id":
-                                      currentEdge.Id = edgeBody.Value.ToString();
-                                      break;
-                                  case "Sfrom":
-                                      currentEdge.Sfrom = edgeBody.Value.ToString();
-                                      break;
-                                  case "BoardSize":
-                                      currentEdge.BoardSize = int.Parse(edgeBody.Value.ToString());
-                                      break;
-                                  case "TotalEven":
-                                      currentEdge.TotalEven = int.Parse(edgeBody.Value.ToString());
-                                      break;
-                                  case "TotalLost":
-                                      currentEdge.TotalLost = int.Parse(edgeBody.Value.ToString());
-                                      break;
-                                  case "TotalPass":
-                                      currentEdge.TotalPass = int.Parse(edgeBody.Value.ToString());
-                                      break;
-                                  case "TotalWin":
-                                      currentEdge.TotalWin = int.Parse(edgeBody.Value.ToString());
-                                      break;
-                                  case "Weight":
-                                      currentEdge.Weight = int.Parse(edgeBody.Value.ToString());
-                                      break;
-                                  case "fromlayer":
-                                      currentEdge.fromlayer = int.Parse(edgeBody.Value.ToString());
-                                      break;
-
-                              }//end switch
-                          }//end foreach edgebody
-                          edges.Add(currentEdge);
-                          
-                      }//end foreach edge
-                      currentState.Edges.AddRange(edges);
-                      value.Add(currentState);
-
-                  }
-                  //Debug.Log("dic contains " + DicByLayer.Count + " layers");
-                  //Debug.Log("my*********************** key is==== " + key + "  num of states ===  " + value.Count);
-                  GameHeader.DicByLayer.Add(v, value);//add to the dictionary
-              
-              }//end if
-
-      });
-
-        }//end for v
-        Debug.Log("dic contains " + GameHeader.DicByLayer.Count +" layers");
-        foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
-            Debug.Log(kv.Key + " * **---*** " + "cntt = " + kv.Value.Count);
-
-
+          .ValueChanged += GameHeader_ValueChanged;
 
     }
 
+    private static void GameHeader_ValueChanged(object sender, ValueChangedEventArgs e)
+    {
+        int v = GameHeader.CurrentTurn;
 
+        if (e.DatabaseError != null)
+        {
+            Debug.LogError(e.DatabaseError.Message);
+            return;
+        }
+
+        // Do something with the data in args.Snapshot
+        DataSnapshot snapshot = e.Snapshot;
+
+        Dictionary<string, object> dic = (Dictionary<string, object>)snapshot.Value;
+
+        List<State> value = new List<State>();
+        State currentState;
+        //Debug.Log("dic contains " + staticDic.Count + " elements");
+        //foreach (KeyValuePair<string, object> kv in staticDic)
+        //    Debug.Log(kv.Key + " * **---*** " + "val = " + kv.Value);
+        Dictionary<string, object> edgesDic;
+        List<Edge> edges = new List<Edge>();
+        Edge currentEdge;
+        foreach (KeyValuePair<string, System.Object> item in dic)
+        {
+            edges.Clear();
+
+            edgesDic = (Dictionary<string, System.Object>)item.Value;
+            currentState = new State
+            {
+                Id = item.Key,
+                Edges = new List<Edge>()
+           
+            };
+
+            edgesDic = (Dictionary<string, System.Object>)edgesDic["Edges"];
+
+            //foreach (KeyValuePair<string, System.Object> keyValuePair in edgesDic)
+            //    Debug.Log(keyValuePair.Key);
+            foreach (KeyValuePair<string, System.Object> keyValue in edgesDic)
+            {
+                Dictionary<string, System.Object> currentEdgeDB = new Dictionary<string, System.Object>();
+
+                currentEdgeDB = (Dictionary<string, System.Object>)keyValue.Value;
+
+                currentEdge = new Edge { };
+
+                foreach (KeyValuePair<string, System.Object> edgeBody in currentEdgeDB)
+                {
+                    //Debug.Log(edgeBody.Key + ": " + edgeBody.Value.ToString());
+                    switch (edgeBody.Key)
+                    {
+                        case "Id":
+                            currentEdge.Id = edgeBody.Value.ToString();
+                            break;
+                        case "Sfrom":
+                            currentEdge.Sfrom = edgeBody.Value.ToString();
+                            break;
+                        case "BoardSize":
+                            currentEdge.BoardSize = int.Parse(edgeBody.Value.ToString());
+                            break;
+                        case "TotalEven":
+                            currentEdge.TotalEven = int.Parse(edgeBody.Value.ToString());
+                            break;
+                        case "TotalLost":
+                            currentEdge.TotalLost = int.Parse(edgeBody.Value.ToString());
+                            break;
+                        case "TotalPass":
+                            currentEdge.TotalPass = int.Parse(edgeBody.Value.ToString());
+                            break;
+                        case "TotalWin":
+                            currentEdge.TotalWin = int.Parse(edgeBody.Value.ToString());
+                            break;
+                        case "Weight":
+                            currentEdge.Weight = int.Parse(edgeBody.Value.ToString());
+                            break;
+                        case "fromlayer":
+                            currentEdge.fromlayer = int.Parse(edgeBody.Value.ToString());
+                            break;
+
+                    }//end switch
+                }//end foreach edgebody
+                edges.Add(currentEdge);
+                
+
+            }//end foreach edge
+            currentState.Edges.AddRange(edges);
+            
+            value.Add(currentState);
+           
+            State found;
+            if (GameHeader.DicByLayer.ContainsKey(v))//has this layer, add the state to the list
+            {
+
+                found = GameHeader.DicByLayer[v].Find(s => s.Id.Equals(currentState.Id));
+                if (found == null)//add the state
+                {
+                    GameHeader.DicByLayer[v].Add(currentState);
+                }
+                else//update the edges
+                {
+                    found = currentState;
+                }
+
+            }
+
+        }
+        //Debug.Log("dic contains " + DicByLayer.Count + " layers");
+        //Debug.Log("my*********************** key is==== " + key + "  num of states ===  " + value.Count);
+        if (!GameHeader.DicByLayer.ContainsKey(v))
+        {
+            GameHeader.DicByLayer.Add(v, value);//add to the dictionary
+        }
+
+
+    }//end on value changed
+
+
+
+
+
+    public void printwinsoutside()
+    {
+        Debug.Log("wins outside:");
+        foreach (string s in GameHeader.WinGeneSet)
+            Debug.Log(s);
+    }
+    public static void printDic(int v)
+    {
+        
+
+    }
     // Use this for initialization
     void Start () {
 

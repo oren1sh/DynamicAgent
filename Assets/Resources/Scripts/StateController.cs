@@ -74,46 +74,38 @@ public class StateController {
     }
     public void GetWinGene()
     {
-        // Set this before calling into the realtime database.
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
-
-
-        // Get the root reference location of the database.
         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
-        //key = mDatabaseRef.Child($"BoardSize:{GameHeader.BoradSize}").Child("Edges").Push().Key;
-
-        //mDatabaseRef.Child("BoardSize").Child(""+GameHeader.BoradSize).Child("WinStates").Child(json).SetRawJsonValueAsync("1");
-
 
         FirebaseDatabase.DefaultInstance
-      .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("WinStates")
-      .GetValueAsync().ContinueWith(task => {
-          if (task.IsFaulted)
-          {
-              // Handle the error...
-          }
-          else if (task.IsCompleted)
-          {
-              DataSnapshot snapshot = task.Result;
-              // Do something with snapshot...
-              //Debug.Log(snapshot);
-              //Debug.Log(snapshot.Value);
-              //Debug.Log(snapshot.Children);
-              Dictionary<string, object> dic = (Dictionary<string, object>)snapshot.Value;
-
-              //IEnumerator enumerator = snapshot.get;
-              foreach (var item in dic)
-              {
-                  GameHeader.WinGeneSet.Add(item.Key);
-                  Debug.Log("adding the key fuck! " + item.Key);
-              }
-          }
-      });
-
-        Debug.Log("wins outside:");
-        foreach (string s in GameHeader.WinGeneSet)
-            Debug.Log(s);
+     .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("WinStates")
+     .ValueChanged += StateController_ValueChanged;
     }
+    private void StateController_ValueChanged(object sender, ValueChangedEventArgs e)
+    {
+        if (e.DatabaseError != null)
+        {
+            Debug.LogError(e.DatabaseError.Message);
+            return;
+        }
+        // Do something with the data in args.Snapshot
+        DataSnapshot snapshot = e.Snapshot;
+
+        Dictionary<string, object> dic = (Dictionary<string, object>)snapshot.Value;
+
+        //IEnumerator enumerator = snapshot.get;
+        foreach (var item in dic)
+        {
+            GameHeader.WinGeneSet.Add(item.Key);
+            Debug.Log("adding the key fuck! " + item.Key);
+        }
+
+    }//end on value changed
+    
+
+
+    
+    
 
     public void AddWinGene(string WinStr,string Token)//add a win state from control to Header
     {

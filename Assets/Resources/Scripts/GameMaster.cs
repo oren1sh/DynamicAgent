@@ -1,4 +1,5 @@
-﻿using Firebase;
+﻿using Assets.Resources.Scripts;
+using Firebase;
 using Firebase.Database;
 using Firebase.Unity.Editor;
 using Newtonsoft.Json;
@@ -11,7 +12,7 @@ using UnityEngine.UI;
 
 public class GameMaster : MonoBehaviour {
 
-    public GameObject TBoard;
+    public GameObject ButtonMaster;
     public GameHeader GameHeader;
     StateController  stateController;
     EdgeController edgeController;
@@ -20,6 +21,7 @@ public class GameMaster : MonoBehaviour {
     private Text[] TtB;// = new Text[GameHeader.BoradSize * GameHeader.BoradSize];
 
     public List<Button> Buttons;
+
     public Dictionary<string, Button> StrToBnt;
     public bool BEnd;
 
@@ -28,20 +30,13 @@ public class GameMaster : MonoBehaviour {
 
     public int i;
     CpuPlayer cpuPlayer;
-    EdgeRoot e;
+    Edge e;
     Button temp;
+    Layer a;
+    JsonState jsonState;
     // Use this for initialization
-    IEnumerator Start () {
+    void  Start () {
         
-        string url = "https://dynamicagent-681fa.firebaseio.com/BoardSize/3/Layers/0/States/_________/Edges/2-X-0.json";
-        
-        using (WWW www = new WWW(url))
-        {
-            yield return www;
-            e = JsonUtility.FromJson<EdgeRoot>(www.text);
-            Debug.Log("json === \n "+www.text);
-            Debug.Log("from jjjjjjjjjjjjjjjjjj = " + e.Edge.Id);
-        }
        
         stateController = new StateController();
         if(GameHeader.DicByLayer== null || (GameHeader.CurrentTurn==0 && !GameHeader.DicByLayer.ContainsKey(0)))//first play, get the layer 0's states
@@ -53,8 +48,8 @@ public class GameMaster : MonoBehaviour {
        
 
         edgeController = new EdgeController();
-        Tt = TBoard.GetComponentInChildren<Text>();//get board header
-        Buttons = TBoard.GetComponentsInChildren<Button>().ToList();//get currnet board buttons
+        Tt = ButtonMaster.GetComponentInChildren<Text>();//get board header
+        Buttons = ButtonMaster.GetComponentsInChildren<Button>().ToList();//get currnet board buttons
         StrToBnt = new Dictionary<string, Button>();
         i = 0;
         foreach (Button bnt in Buttons)
@@ -122,6 +117,7 @@ public class GameMaster : MonoBehaviour {
     public void OnPress(Button Bnt)//,,like end of turn''
     {
         PrevState = GetBoard();
+
         if (GameHeader.Dirty)//are we OnEdit1
         {
             SetBoard();
@@ -161,8 +157,7 @@ public class GameMaster : MonoBehaviour {
         Bnt.interactable = false;
 
         GameHeader.Borad = GetBoard();//get board
-
-
+        GameHeader.LastState = GetBoard();
         /*	check win */
         if (CheckWin())//if someone wins, end it, else, continue play
         {
@@ -173,6 +168,15 @@ public class GameMaster : MonoBehaviour {
             //foreach (Edge edge in edgeController.CheckEdges)
             //    output += edge.Id + " state == " + edge.Sfrom + "   layer = " + edge.fromlayer+"\n";
             //Debug.Log(output);
+            State winState = new State {
+                Id = GetBoard(),
+                //WinState = GameHeader.BWin,
+                Layer = GameHeader.CurrentTurn + 1,
+                BoardSize = GameHeader.BoradSize
+            };
+            //add the win state to db
+
+            //stateController.AddState();
             edgeController.UpdateAllCheckedEdges();
 
             return;
@@ -273,12 +277,14 @@ public class GameMaster : MonoBehaviour {
     public void SetBoard()//clean the board
     {
     foreach (Button Bnt in Buttons)
-    {
-        Bnt.GetComponentInChildren<Text>().text = "_";
+        {
+            Bnt.GetComponentInChildren<Text>().text = "_";
+            Bnt.interactable = true;
 
-       // Debug.Log("set button num=" + (int.Parse(Bnt.name.Replace("Button-", ""))));
+
+        // Debug.Log("set button num=" + (int.Parse(Bnt.name.Replace("Button-", ""))));
         //Debug.Log("set button text=" + Bnt.GetComponentInChildren<Text>().text);
-    }
+        }
 
     }
     int index = 0;
@@ -372,8 +378,7 @@ public class GameMaster : MonoBehaviour {
     public bool StrAndSter(string a,string b)//is a&b=B
     {
     string STemp ="";
-        //Debug.Log("a length ======= " + a.Length + " and b length ====== " + b.Length);
-        //Debug.Log("a is : " + a + " and b is : " + b);
+
     for (int i = 0; i < a.Length; i++)
     {
         if(a[i]==b[i])
@@ -396,6 +401,17 @@ public class GameMaster : MonoBehaviour {
 
     }
 
+
+    public void OnRestart()
+    {
+        SetBoard();//clean board
+        GameHeader.CurrentTurn = 0;//start turn
+        GameHeader.CurrentToken = "X";//start with X
+        GameHeader.Win = "";//no win
+        GameHeader.BWin = false;//reswt win flage
+        GameHeader.Borad = GetBoard();//
+
+    }
 
 
 }

@@ -3,7 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+[Serializable]
+public class JsonEdge
+{
+    public string Id;//bnt-token-fromlayer
+    public string Sfrom;
+    public string Sto;
+    public double Weight;
+    public double TotalPass;
+    public double TotalWin;
+    public double TotalLost;
+    public double TotalEven;
+    public double fromlayer;
+    public int BoardSize;
+}
 [Serializable]
 public class Edge{
     public string Id { get; set; }//bnt-token-fromlayer
@@ -30,7 +43,20 @@ public class Edge{
 
     }
 
+    public Edge(JsonEdge jsonEdge)
+    {
+        this.Id = jsonEdge.Id;//bnt-token-fromlayer
+        this.Sfrom = jsonEdge.Sfrom;
+        this.Sto = jsonEdge.Sto;
+        this.Weight = jsonEdge.Weight;
+        this.TotalPass = jsonEdge.TotalPass;
+        this.TotalWin = jsonEdge.TotalWin;
+        this.TotalLost = jsonEdge.TotalLost;
+        this.TotalEven = jsonEdge.TotalEven;
+        this.fromlayer = jsonEdge.fromlayer;
+        this.BoardSize = jsonEdge.BoardSize;
 
+}//end copy constructor
     public Dictionary<string, System.Object> ToDictionary()
     {
         Dictionary<string, System.Object> result = new Dictionary<string, System.Object>();

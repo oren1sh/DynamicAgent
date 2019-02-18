@@ -132,7 +132,7 @@ public class EdgeController
 
             string dicKey = "BoardSize/" + GameHeader.BoradSize.ToString() + "/Layers/" + entry.fromlayer.ToString() + "/States/" + entry.Sfrom + "/Edges/";
             Debug.Log("add the key " + dicKey);
-            childUpdates.Add(dicKey + key,entryValues);
+            childUpdates.Add(dicKey + key,entryValues);//give ==>ArgumentException: An item with the same key has already been added. Key
 
         }
         Debug.Log("update in DB:");
@@ -153,35 +153,44 @@ public class EdgeController
 
     public Edge AddNewEdge(string Id, string Sfrom, int fromlayer)
     {
+        Debug.Log("old ==== " + GameHeader.Borad);
 
         ETemp = new Edge();
         ETemp.Id = Id;
+        System.Text.StringBuilder newBoard = new System.Text.StringBuilder(GameHeader.Borad);
+        newBoard[int.Parse(Id[0].ToString())] = Id[2];
+        string newBoard2 = newBoard.ToString();      
+        
+        Debug.Log("the new one will be    ====      " + newBoard2);
+        ETemp.Sto = newBoard2;
         ETemp.Sfrom = Sfrom;
+        
         ETemp.fromlayer = fromlayer;
         ETemp.Weight = (GameHeader.BoradSize * GameHeader.BoradSize);
         NewEdges.Add(ETemp);//add to my list
 
         SaveNewEdge(ETemp);//add to database
-
+        
         return ETemp;
     }
     public Edge GetEdgeInLayer(string edgeID,int layer)
     {
         List<State> states = new List<State>();
-        Debug.Log("looking for layer " + layer + " in the dic");
-        foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
-            Debug.Log(kv.Key+" * **---*** " + "cntt = " + kv.Value.Count);
-        Debug.Log("--------------------end of dic -------------");
-        //if(stateController.DicByLayer.ContainsKey(layer))
+       // Debug.Log("looking for layer " + layer + " in the dic");
+        //foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
+        //    Debug.Log(kv.Key+" * **---*** " + "cntt = " + kv.Value.Count);
+        //Debug.Log("--------------------end of dic -------------");
+        if(GameHeader.DicByLayer.ContainsKey(layer))
             states = GameHeader.DicByLayer[layer];//get states in layer
-        Debug.Log("states in layer " + layer + " === " + states.Count);
+        //Debug.Log("states in layer " + layer + " === " + states.Count);
         Edge output;
+
         foreach (State state in states)//check in all states if they have the edge
         {
-            //Debug.Log("state === " + state.Id + " and list of edges === ");
+            Debug.Log("state === " + state.Id + " and list of edges === ");
             foreach (Edge e in state.Edges)
                 Debug.Log(e.Id + "=?" + edgeID);
-            //Debug.Log("===============================================");
+            Debug.Log("===============================================");
             
             output = state.Edges.Find(e => e.Id.Equals(edgeID));
             if (output != null)//edge found
@@ -209,9 +218,12 @@ public class EdgeController
         string json = JsonConvert.SerializeObject(ETemp);
 
         //Debug.Log("json==" + json);
-        string guid = Guid.NewGuid().ToString();
-        mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn).ToString()).Child("States").Child(GameHeader.Borad)
+        State currentState = new State { Id = GameHeader.Borad };
+        mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn).ToString()).Child("States")
+        .Child(currentState.Id)
             .Child("Edges").Child(ETemp.Id).SetRawJsonValueAsync(json);
+
+        
 
         //mDatabaseRef.SetValueAsync($"BoardSize/{GameHeader.BoradSize.ToString()} " +
         //    $"Layer/{ETemp.fromlayer.ToString()}" +
