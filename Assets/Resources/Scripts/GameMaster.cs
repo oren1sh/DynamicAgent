@@ -39,11 +39,11 @@ public class GameMaster : MonoBehaviour {
         
        
         stateController = new StateController();
-        if(GameHeader.DicByLayer== null || (GameHeader.CurrentTurn==0 && !GameHeader.DicByLayer.ContainsKey(0)))//first play, get the layer 0's states
-        {
-            Debug.Log("GameHeader.CurrentTurn==0 and i'm loading the DIC");
-            GameHeader.GetStatesForLayer();
-        }
+        //if(GameHeader.DicByLayer== null || (GameHeader.CurrentTurn==0 && !GameHeader.DicByLayer.ContainsKey(0)))//first play, get the layer 0's states
+        //{
+        //    Debug.Log("GameHeader.CurrentTurn==0 and i'm loading the DIC");
+        //    GameHeader.GetStatesForLayer();//load 0 and 1
+        //}
 
        
 
@@ -105,14 +105,13 @@ public class GameMaster : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-//if(e != null)
-//            Debug.Log("edge from json ==== " + e.Id);
 
+        if (!GameHeader.CurrentToken.Equals("X") && !GameHeader.BWin)//if not human player
+        {
+            OnPress(null);
+        }
     }
-    public static void OnCpuPress(Button Bnt)//,,like end of turn''
-    {
-        
-    }
+ 
 
     public void OnPress(Button Bnt)//,,like end of turn''
     {
@@ -141,6 +140,8 @@ public class GameMaster : MonoBehaviour {
         {
             //set btn by random ....
             Bnt = cpuPlayer.PlayTurn();
+            if (Bnt == null)
+                goto ENDGAME;
         }
 
         //GameHeader.SetNextPlayerToken
@@ -153,81 +154,36 @@ public class GameMaster : MonoBehaviour {
             currentEdge = edgeController.AddNewEdge(currentEdgeID, PrevState, GameHeader.CurrentTurn);
         }
         edgeController.CheckEdges.Add(currentEdge);//add to checked list
-        Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;
+
+        Bnt.GetComponentInChildren<Text>().text = GameHeader.CurrentToken;//place the token
+
         Bnt.interactable = false;
 
         GameHeader.Borad = GetBoard();//get board
-        GameHeader.LastState = GetBoard();
-        /*	check win */
-        if (CheckWin())//if someone wins, end it, else, continue play
+                                      /*	check win */
+    ENDGAME:
         {
-            Tt.text = "player " + GameHeader.CurrentToken + " has won";
-            DisableAllButtons();
-            //Debug.Log("checked edges === ");
-            //string output = "";
-            //foreach (Edge edge in edgeController.CheckEdges)
-            //    output += edge.Id + " state == " + edge.Sfrom + "   layer = " + edge.fromlayer+"\n";
-            //Debug.Log(output);
-            State winState = new State {
-                Id = GetBoard(),
-                //WinState = GameHeader.BWin,
-                Layer = GameHeader.CurrentTurn + 1,
-                BoardSize = GameHeader.BoradSize
-            };
-            //add the win state to db
+            if (CheckWin())//if someone wins, end it, else, continue play
+            {
+                Tt.text = "player " + GameHeader.CurrentToken + " has won";
+                DisableAllButtons();
+                edgeController.UpdateAllCheckedEdges();
 
-            //stateController.AddState();
-            edgeController.UpdateAllCheckedEdges();
-
-            return;
+                return;
+            }
         }
-        //TODO: run on win list with currnet state
-        /* if(win)
-            end */
-
-
-
         /*  go to other player -set other player flag ==> player   */
         GameHeader.SetNextPlayerToken();
         Debug.Log("GameHeader.CurrentTurn1=====" + GameHeader.CurrentTurn);
 
-        if (!GameHeader.DicByLayer.ContainsKey(GameHeader.CurrentTurn))//load this layer
-        {
-            Debug.Log("GameHeader.CurrentTurn2=====" + GameHeader.CurrentTurn);
-            GameHeader.GetStatesForLayer();
-            foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
-                Debug.Log(kv.Key + " 1contains " + kv.Value.Count + " 1states ");
-        }
-           
-        ////Debug.Log("current status of layers dic:");
-        //foreach (KeyValuePair<int, List<State>> kv in stateController.DicByLayer)
-        //    Debug.Log(kv.Key + " contains " + kv.Value.Count + " states ");
-
+       
 
         /* if (computer)
             put token */
-        if (!GameHeader.CurrentToken.Equals("X"))//if not human player
-        {
-            OnPress(null);
-        }
+       
 
         //end nadav 
-        /*
-        Debug.Log("OnPress=>" + Bnt);
-        PrevState = GetBoard();
 
-        //CurrnetState = GetBoard();
-
-        OnEndTurn();
-
-
-
-
-        //check if new state
-        //check if new edge
-
-
-        */
     }
 
     private void DisableAllButtons()
@@ -280,10 +236,6 @@ public class GameMaster : MonoBehaviour {
         {
             Bnt.GetComponentInChildren<Text>().text = "_";
             Bnt.interactable = true;
-
-
-        // Debug.Log("set button num=" + (int.Parse(Bnt.name.Replace("Button-", ""))));
-        //Debug.Log("set button text=" + Bnt.GetComponentInChildren<Text>().text);
         }
 
     }
@@ -331,10 +283,6 @@ public class GameMaster : MonoBehaviour {
         {
             str += "W-";
         }
-        //else
-        //{
-        //    str += GameHeader.CurrentTurn + "-";
-        //}
 
 
         foreach (Button Bnt in Buttons)

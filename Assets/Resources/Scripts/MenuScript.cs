@@ -44,11 +44,17 @@ public class MenuScript : MonoBehaviour {
     public void OnStartNewGame()
     {
         //Debug.Log("OnStartNewGame");
-       // gameMaster.SetCpuPlayer();
+        // gameMaster.SetCpuPlayer();
+ 
+
         MainPanel.SetActive(false);
         Board3.SetActive(true);
         GameHeader.OnEditWin = false;
-
+        if (GameHeader.DicByLayer == null || (GameHeader.CurrentTurn == 0 && !GameHeader.DicByLayer.ContainsKey(0)))//first play, get the layer 0's states
+        {
+            Debug.Log("GameHeader.CurrentTurn==0 and i'm loading the DIC");
+            GameHeader.GetStatesForLayer();//load 0 and 1
+        }
 
     }
     public void OnEditWinState()

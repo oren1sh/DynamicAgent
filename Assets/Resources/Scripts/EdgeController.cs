@@ -131,13 +131,21 @@ public class EdgeController
             Dictionary<string, System.Object> entryValues = entry.ToDictionary();
 
             string dicKey = "BoardSize/" + GameHeader.BoradSize.ToString() + "/Layers/" + entry.fromlayer.ToString() + "/States/" + entry.Sfrom + "/Edges/";
-            Debug.Log("add the key " + dicKey);
-            childUpdates.Add(dicKey + key,entryValues);//give ==>ArgumentException: An item with the same key has already been added. Key
+            //Debug.Log("add the key " + dicKey);
+            try
+            {
+                childUpdates.Add(dicKey + key, entryValues);//give ==>ArgumentException: An item with the same key has already been added. Key
 
+            }
+            catch
+            {
+                childUpdates[dicKey + key] = entryValues;
+            }
+                       
         }
-        Debug.Log("update in DB:");
-        foreach (KeyValuePair<string, System.Object> keyValuePair in childUpdates)
-            Debug.Log("key ===" + keyValuePair.Key + " value ===== wait for it");
+        //Debug.Log("update in DB:");
+        //foreach (KeyValuePair<string, System.Object> keyValuePair in childUpdates)
+          //  Debug.Log("key ===" + keyValuePair.Key + " value ===== wait for it");
         //update all the dictionary
          mDatabaseRef.UpdateChildrenAsync(childUpdates);
 
@@ -187,10 +195,10 @@ public class EdgeController
 
         foreach (State state in states)//check in all states if they have the edge
         {
-            Debug.Log("state === " + state.Id + " and list of edges === ");
-            foreach (Edge e in state.Edges)
-                Debug.Log(e.Id + "=?" + edgeID);
-            Debug.Log("===============================================");
+            //Debug.Log("state === " + state.Id + " and list of edges === ");
+            //foreach (Edge e in state.Edges)
+            //    Debug.Log(e.Id + "=?" + edgeID);
+            //Debug.Log("===============================================");
             
             output = state.Edges.Find(e => e.Id.Equals(edgeID));
             if (output != null)//edge found
@@ -218,7 +226,12 @@ public class EdgeController
         string json = JsonConvert.SerializeObject(ETemp);
 
         //Debug.Log("json==" + json);
-        State currentState = new State { Id = GameHeader.Borad };
+        State currentState = new State { Id = GameHeader.Borad,
+                                         Layer = GameHeader.CurrentTurn};
+
+        mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn).ToString()).Child("States")
+        .Child(currentState.Id)
+            .Child("LayerID").SetValueAsync(currentState.Layer);
         mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn).ToString()).Child("States")
         .Child(currentState.Id)
             .Child("Edges").Child(ETemp.Id).SetRawJsonValueAsync(json);
