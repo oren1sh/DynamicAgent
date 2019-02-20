@@ -1,5 +1,10 @@
-﻿using System.Collections;
+﻿using Firebase;
+using Firebase.Database;
+using Firebase.Unity.Editor;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class BrainCreator : MonoBehaviour {
@@ -9,6 +14,8 @@ public class BrainCreator : MonoBehaviour {
     public GameHeader GameHeader;
     public Ray Ray;
 
+    public List<GameObject> nodes;
+
     public LineRenderer line;
 
     public List<State> states;
@@ -16,18 +23,123 @@ public class BrainCreator : MonoBehaviour {
 
     public Dictionary<string, Vector3> NameToPosDic;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
+    public bool databaseLoaded;
+        // Use this for initialization
+    void Start () {
+        databaseLoaded = false;
+    }
 	
 	// Update is called once per frame
 	void Update () {
-		
+        if (databaseLoaded)
+        {
+            databaseLoaded = false;
+            CreateBrain();
+
+        }
 	}
+    public Color GetColorForState(State stateID)
+    {
+        string win;
+        foreach (string a in GameHeader.WinGeneSet)
+        {
+            //Debug.Log("a =========>" + a);
+            win = a.Replace("\"", "").Remove(0, a.IndexOf("-"));//a=" W-_______"
+            if (GameMaster.StrAndSter(win, stateID.Id))
+                return Color.green;
+        }  
+       return Color.white;
+    }
+    void CreateBrain()
+    {
+        //oren body for the generator
+        Debug.Log("PlaceState()");
+
+        NameToPosDic = new Dictionary<string, Vector3>();
+        int index = 0;
+        int j = 0;
+        List<Color> color = new List<Color> { Color.black, Color.blue, Color.cyan, Color.gray, Color.green, Color.grey, Color.red, Color.white, Color.yellow };
+        //GameObject sp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //sp.transform.position = Vector3.zero;
+        for (int i = 0; i <= (GameHeader.BoradSize * GameHeader.BoradSize); i++)
+        {
+            if (dicTarget.ContainsKey(i))
+            {
+                j = 0;
+                foreach (State states in dicTarget[i])
+                {
+
+                    radius = (float)dicTarget[i].Count * i;
+                    //Debug.Log("radius " + radius);
+                    float angle = j * Mathf.PI * 2f / dicTarget[i].Count;
+                    //Debug.Log("angle " + angle);
+                    Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i * 10, Mathf.Sin(angle) * radius);
+                    //Debug.Log("newPos " + newPos);
+
+                    GameObject go = Instantiate(StateSimple, newPos, Quaternion.identity);
+                    go.name = states.Id;
+                    go.GetComponent<MeshRenderer>().material.color = GetColorForState(states);
+                    go.transform.parent = this.transform;
+                    nodes.Add(go);
+                    NameToPosDic.Add(states.Id, new Vector3(go.transform.position.x, go.transform.position.y, go.transform.position.z));
+                    //foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
+                    //    Debug.Log(kv.Key + " * **---*** " + "val = " + kv.Value);
+
+
+                    //foreach (Edge E in states.Edges)
+                    //{
+                    //    Color color = Color.blue;
+                    //    Debug.DrawRay(GameObject.Find(E.Sto).transform.localPosition, newPos, color);
+                    //    Debug.Log("DrawRay " + GameObject.Find(E.Sfrom).transform.localPosition+" to "+ newPos + " color "+ color);
+
+                    //}
+
+                    j++;
+                }
+            }
+        }
+        //foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
+        //    Debug.Log(kv.Key + " * **---*** " + "val  after= " + kv.Value);
+        for (int i = 0; i < (GameHeader.BoradSize * GameHeader.BoradSize); i++)
+        {
+            if (dicTarget.ContainsKey(i))
+            {
+                j = 0;
+                foreach (State states in dicTarget[i])
+                {
+                    radius = (float)dicTarget[i].Count * i;
+                    //Debug.Log("radius " + radius);
+                    float angle = j * Mathf.PI * 2f / dicTarget[i].Count;
+                    //Debug.Log("angle " + angle);
+                    Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i * 10, Mathf.Sin(angle) * radius);
+                    //Debug.Log("newPos " + newPos);
+
+                    foreach (Edge E in states.Edges)
+                    {
+                        if (E.Sto != null && NameToPosDic.ContainsKey(E.Sto))
+                        {
+
+                            Vector3 pos = newPos;
+                            Vector3 dir = (NameToPosDic[E.Sto] - newPos).normalized;
+                            float dir1 = (NameToPosDic[E.Sto] - newPos).magnitude;
+
+
+                            Debug.DrawRay(newPos, dir1 * dir, color[i], Mathf.Infinity, true);
+                        }
+
+
+                    }
+
+                    j++;
+                }
+            }
+        }
+
+    }//end create brain
 
 
     float radius = 1f;
+    private Dictionary<int, List<State>> dicTarget;
 
     /*
     void OnDrawGizmosSelected()
@@ -81,82 +193,137 @@ public class BrainCreator : MonoBehaviour {
     }
 
     */
+
     public void PlaceState()
     {
-        Debug.Log("PlaceState()");
-        NameToPosDic = new Dictionary<string, Vector3>();
-        int index = 0;
-        int j = 0;
-        for (int i = 0; i < (GameHeader.BoradSize* GameHeader.BoradSize); i++)
+        dicTarget = new Dictionary<int, List<State>>();
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
+
+        DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
+        FirebaseDatabase.DefaultInstance
+     .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").ValueChanged +=(sender,e)=> BrainCreator_ValueChanged(sender,e,dicTarget);
+        Debug.Log("things before loading db");
+        databaseLoaded = false;
+          
+          //Debug.Log("PlaceState()");
+
+          //NameToPosDic = new Dictionary<string, Vector3>();
+          //int index = 0;
+          //int j = 0;
+          //List<Color> color = new List<Color>{Color.black, Color.blue, Color.cyan, Color.gray, Color.green, Color.grey, Color.red, Color.white, Color.yellow };
+          //GameObject sp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+          //sp.transform.position = Vector3.zero;
+          //for (int i = 0; i < (GameHeader.BoradSize* GameHeader.BoradSize); i++)
+          //{
+          //    if (GameHeader.DicByLayer.ContainsKey(i))
+          //    {
+          //        j = 0;
+          //        foreach (State states in GameHeader.DicByLayer[i])
+          //        {
+
+          //            radius = (float)GameHeader.DicByLayer[i].Count * i;
+          //            //Debug.Log("radius " + radius);
+          //            float angle = j * Mathf.PI * 2f / GameHeader.DicByLayer[i].Count;
+          //            //Debug.Log("angle " + angle);
+          //            Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i*10, Mathf.Sin(angle) * radius);
+          //            //Debug.Log("newPos " + newPos);
+          //            GameObject go = Instantiate(StateSimple, newPos, Quaternion.identity);
+          //            go.name = states.Id;
+          //            go.GetComponent<MeshRenderer>().material.color = color[i];
+
+
+          //            NameToPosDic.Add(states.Id, new Vector3(go.transform.position.x, go.transform.position.y, go.transform.position.z));
+          //            foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
+          //              Debug.Log(kv.Key + " * **---*** " + "val = " + kv.Value);
+
+
+          //            //foreach (Edge E in states.Edges)
+          //            //{
+          //            //    Color color = Color.blue;
+          //            //    Debug.DrawRay(GameObject.Find(E.Sto).transform.localPosition, newPos, color);
+          //            //    Debug.Log("DrawRay " + GameObject.Find(E.Sfrom).transform.localPosition+" to "+ newPos + " color "+ color);
+
+          //            //}
+
+          //            j++;
+          //        }
+          //    }
+          //}
+          //foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
+          //    Debug.Log(kv.Key + " * **---*** " + "val  after= " + kv.Value);
+          //for (int i = 0; i < (GameHeader.BoradSize * GameHeader.BoradSize); i++)
+          //{
+          //    if (GameHeader.DicByLayer.ContainsKey(i))
+          //    {
+          //        j = 0;
+          //        foreach (State states in GameHeader.DicByLayer[i])
+          //        {
+          //            radius = (float)GameHeader.DicByLayer[i].Count * i;
+          //            //Debug.Log("radius " + radius);
+          //            float angle = j * Mathf.PI * 2f / GameHeader.DicByLayer[i].Count;
+          //            //Debug.Log("angle " + angle);
+          //            Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i * 10, Mathf.Sin(angle) * radius);
+          //            //Debug.Log("newPos " + newPos);
+
+          //            foreach (Edge E in states.Edges)
+          //            {
+          //                if (E.Sto != null && NameToPosDic.ContainsKey(E.Sto))
+          //                {
+
+          //                    Vector3 pos = newPos;
+          //                    Vector3 dir = (NameToPosDic[E.Sto] - newPos).normalized;
+          //                    float dir1 = (NameToPosDic[E.Sto] - newPos).magnitude;
+
+
+          //                    Debug.DrawRay(newPos, dir1 * dir , color[i], Mathf.Infinity ,true);
+          //                }
+
+
+          //            }
+
+          //            j++;
+          //        }
+          //    }
+          //}
+      }
+
+    private void BrainCreator_ValueChanged(object sender, ValueChangedEventArgs e, Dictionary<int, List<State>> dicTarget)
+    {
+        List<object> valueMadaFucka;
+
+        DataSnapshot snapshot = e.Snapshot;
+        Dictionary<string, object> dic = new Dictionary<string, object>();
+
+        //Debug.Log("so far so good");
+        //Debug.Log("snapshot va.lue === " + snapshot.Value);
+
+        try
         {
-            if (GameHeader.DicByLayer.ContainsKey(i))
+            valueMadaFucka = (List<object>)snapshot.Value;
+            for (int v = 0; v < valueMadaFucka.Count; v++)
             {
-                j = 0;
-                foreach (State states in GameHeader.DicByLayer[i])
-                {
-                    
-                    radius = (float)i*10;
-                    Debug.Log("radius " + radius);
-                    float angle = j * Mathf.PI * 2f / GameHeader.DicByLayer[i].Count;
-                    Debug.Log("angle " + angle);
-                    Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i*10, Mathf.Sin(angle) * radius);
-                    Debug.Log("newPos " + newPos);
-                    GameObject go = Instantiate(StateSimple, newPos, Quaternion.identity);
-                    go.name = states.Id;
-                    
-                    NameToPosDic.Add(states.Id, new Vector3(go.transform.position.x, go.transform.position.y, go.transform.position.z));
-                    foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
-                      Debug.Log(kv.Key + " * **---*** " + "val = " + kv.Value);
+                object obj = valueMadaFucka[v];
+                dic = (Dictionary<string, System.Object>)obj;
 
 
-                    //foreach (Edge E in states.Edges)
-                    //{
-                    //    Color color = Color.blue;
-                    //    Debug.DrawRay(GameObject.Find(E.Sto).transform.localPosition, newPos, color);
-                    //    Debug.Log("DrawRay " + GameObject.Find(E.Sfrom).transform.localPosition+" to "+ newPos + " color "+ color);
+                dic = (Dictionary<string, System.Object>)((Dictionary<string, System.Object>)obj)["States"];
 
-                    //}
 
-                    j++;
-                }
-            }
-        }
-        foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
-            Debug.Log(kv.Key + " * **---*** " + "val  after= " + kv.Value);
-        for (int i = 0; i < (GameHeader.BoradSize * GameHeader.BoradSize); i++)
-        {
-            if (GameHeader.DicByLayer.ContainsKey(i))
-            {
-                j = 0;
-                foreach (State states in GameHeader.DicByLayer[i])
-                {
-                    radius = (float)i * 10;
-                    //Debug.Log("radius " + radius);
-                    float angle = j * Mathf.PI * 2f / GameHeader.DicByLayer[i].Count;
-                    //Debug.Log("angle " + angle);
-                    Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i * 10, Mathf.Sin(angle) * radius);
-                    //Debug.Log("newPos " + newPos);
+                //    Debug.Log("start load       v=" + v);
+                //foreach (KeyValuePair<string, object> p in dic)
+                //    Debug.Log("key in dic now is " + p.Key);
 
-                    foreach (Edge E in states.Edges)
-                    {
-                        if (E.Sto != null && NameToPosDic.ContainsKey(E.Sto))
-                        {
+                GameHeader.LoadSnapshotToDictionary(dic, dicTarget, v);
+                //Debug.Log("task complete       v=" + v);
 
-                            Vector3 pos = newPos;
-                            Vector3 dir = (NameToPosDic[E.Sto] - newPos).normalized;
-                            float dir1 = (NameToPosDic[E.Sto] - newPos).magnitude;
+            }//end for v
 
-                            Color color = Color.blue;
+            Debug.Log("SnapShot Changed === " + valueMadaFucka.Count +" layers loaded");
 
-                            Debug.DrawRay(newPos, dir1 * dir , Color.yellow , Mathf.Infinity ,true);
-                        }
-                       
+            Debug.Log("all database loaded, change flag here");
+            databaseLoaded = true;
+        }//end try
+        catch (Exception ex) { Debug.Log(ex.Message); }
+    }//end value changed
+}//end class
 
-                    }
-
-                    j++;
-                }
-            }
-        }
-    }
-}

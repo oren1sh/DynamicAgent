@@ -9,9 +9,9 @@ public class CpuPlayer
 
     public string name { get; set; }//Token
     string CurrentState;
-    string mod;
+    public static string mod { get; set; }
     string TargetEdge;
-    List<int> TargetsOfOptinity;
+    public List<int> TargetsOfOptinity;
 
     public Dictionary<string, Button> StrToBnt { get; set; }
 
@@ -23,9 +23,11 @@ public class CpuPlayer
 
     public GameMaster GameMaster { get; set; }
 
+    private bool FMin = false, FBest = false;
+
     private static Random random;
     private bool rand;
-
+    public float BestPar = 0;
     int index;
 
     Button bnt;
@@ -38,20 +40,14 @@ public class CpuPlayer
 
         //Debug.Log("cpuPlayer.PlayTurn()");
         GameMaster = GameObject.Find("GameMaster").GetComponent<GameMaster>();
-        //Debug.Log("PlayTurn()");
-        //TargetsOfOptinity.Clear();
         TargetsOfOptinity = new List<int>();
         TargetsOfOptinity.Clear();
         CurrentState = GameHeader.Borad;//1-/W-____X___
         bool go = false;
         foreach (var B in CurrentState.Select((value, i) => new { i, value }))
         {
-            //Debug.Log($"B {B}");
             if (B.value == '_')
             {
-
-                //Debug.Log($"B.i {B.i}");
-                //Debug.Log($"B.value {B.value}");
                 TargetsOfOptinity.Add(B.i);
                 TargetEdge += $",{B.i}-{GameHeader.CurrentToken}-{GameHeader.CurrentTurn}";//make edge id
             }
@@ -75,28 +71,57 @@ public class CpuPlayer
                 if (TheStates!=null && TheStates.Edges.Count>0 &&TheStates.Edges[0] != null)
                 {
                     Edge min = TheStates.Edges[0];
-
-
-
+                    Edge BestParmin = TheStates.Edges[0];
                     foreach (Edge E in TheStates.Edges)
                     {
                         if (E.Weight < min.Weight)
+                        {
                             min = E;
-                        TargetsOfOptinity.Remove(int.Parse(E.Id[0].ToString()));
+                            FMin = true; 
+                        }
+                           
+                        if(E.TotalPass != 0)
+                        {
+                            if(BestParmin.TotalPass/BestParmin.TotalWin < E.TotalPass/E.TotalWin)
+                            {
+                                BestParmin = E;
+                                FBest = true;
+                            }
+
+                        }
+                        TargetsOfOptinity.Remove(int.Parse(E.Id[0].ToString()));//remove discover Edges
                     }
-                    //Debug.Log("min.Id[0] " + min.Id[0]);
-                    if (TheStates.Edges.Count >= ((GameHeader.BoradSize*GameHeader.BoradSize)-GameHeader.CurrentTurn))
+                    if((GameHeader.BoradSize * GameHeader.BoradSize)<= min.Weight && TargetsOfOptinity.Count !=0)
                     {
-                        //TargetsOfOptinity.Contains(int.Parse(min.Id[0].ToString()));
-                        return GameMaster.Buttons[int.Parse(min.Id[0].ToString())];
+                        FMin = false;
                     }
-                    index = Random.Range(0, TargetsOfOptinity.Count);
-                    //Debug.Log("TargetsOfOptinity[index] == " + TargetsOfOptinity[index]);
-                    //Debug.Log("[index] == " + index);
-                    return GameMaster.Buttons[TargetsOfOptinity[index]];
+                    if (((BestParmin.TotalPass / BestParmin.TotalWin) <= 0.5) && TargetsOfOptinity.Count != 0)
+                    {
+                        FBest = false;
+                    }
+
+                    switch (mod)
+                    {
+                        case "Weight":
+                            if(FMin)
+                            return GameMaster.Buttons[int.Parse(min.Id[0].ToString())];
+                            break;
+                        case "BestPar":
+                            if(FBest)
+                            return GameMaster.Buttons[int.Parse(BestParmin.Id[0].ToString())];
+                            break;
+                        default:
+                            index = Random.Range(0, TargetsOfOptinity.Count);
+                            return GameMaster.Buttons[TargetsOfOptinity[index]];
+                            break;
+
+
+                    }
+
+                    
+                        
                 }
             }//end if DicByLayer have the layer
-
         }//end if DicByLayer has something
 
         index = Random.Range(0, TargetsOfOptinity.Count);

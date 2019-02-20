@@ -195,7 +195,18 @@ public class StateController {
 
     }
 
+    public void AddWinStateToDB()
+    {
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
 
 
-
+        // Get the root reference location of the database.
+        DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
+        mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn+1).ToString()).Child("States")
+       .Child(GameHeader.Borad)
+           .Child("Win").SetValueAsync("True");
+        mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn + 1).ToString()).Child("States")
+       .Child(GameHeader.Borad)
+           .Child("LayerID").SetValueAsync((GameHeader.CurrentTurn+1));
+    }
 }

@@ -28,16 +28,22 @@ public class GameMaster : MonoBehaviour {
     public string PrevState;
     public string CurrnetState;
 
+    public bool AutoPlay { set; get; }
+
+
     public int i;
     CpuPlayer cpuPlayer;
+    CpuPlayer cpuPlayer2;
     Edge e;
     Button temp;
     Layer a;
     JsonState jsonState;
     // Use this for initialization
     void  Start () {
-        
-       
+
+
+        AutoPlay = false;
+
         stateController = new StateController();
         //if(GameHeader.DicByLayer== null || (GameHeader.CurrentTurn==0 && !GameHeader.DicByLayer.ContainsKey(0)))//first play, get the layer 0's states
         //{
@@ -84,10 +90,19 @@ public class GameMaster : MonoBehaviour {
             GameMaster = this,
 
         };
+        
+        cpuPlayer2 = new CpuPlayer
+        {
+            StrToBnt = StrToBnt,
+            name = GameHeader.Tokens[0],
+            Buttons = Buttons,
+            GameMaster = this,
+
+
+        };
         //SetCpuPlayer();
+        CpuPlayer.mod = "Weight";
 
-
-    
 
 
 
@@ -106,7 +121,7 @@ public class GameMaster : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
-        if (!GameHeader.CurrentToken.Equals("X") && !GameHeader.BWin)//if not human player
+        if ((AutoPlay || !GameHeader.CurrentToken.Equals("X") )&& !GameHeader.BWin)//if not human player
         {
             OnPress(null);
         }
@@ -136,7 +151,7 @@ public class GameMaster : MonoBehaviour {
 
 
 
-        if (!GameHeader.CurrentToken.Equals("X"))//if not human player
+        if (!GameHeader.CurrentToken.Equals("X") || AutoPlay)//if not human player
         {
             //set btn by random ....
             Bnt = cpuPlayer.PlayTurn();
@@ -165,8 +180,10 @@ public class GameMaster : MonoBehaviour {
         {
             if (CheckWin())//if someone wins, end it, else, continue play
             {
+                GameHeader.Borad = GetBoard();
                 Tt.text = "player " + GameHeader.CurrentToken + " has won";
                 DisableAllButtons();
+                stateController.AddWinStateToDB();
                 edgeController.UpdateAllCheckedEdges();
 
                 return;
@@ -190,6 +207,20 @@ public class GameMaster : MonoBehaviour {
     {
         foreach (Button b in Buttons)
             b.interactable = false;
+    }
+
+
+    public void OnAutoPlay()
+    {
+        if(AutoPlay)
+        {
+            AutoPlay = false;
+        }
+        else
+        {
+            AutoPlay = true;
+        }
+
     }
 
     private bool CheckWin()
@@ -275,6 +306,8 @@ public class GameMaster : MonoBehaviour {
 
     //end SetBoard funs
     string str;
+
+
     public string GetBoard()//get board data and return it as a string Layer/w-123456789...
     {
 
@@ -327,25 +360,25 @@ public class GameMaster : MonoBehaviour {
     {
     string STemp ="";
 
-    for (int i = 0; i < a.Length; i++)
-    {
-        if(a[i]==b[i])
+        for (int i = 0; i < a.Length; i++)
         {
-            STemp += a[i];
+            if(a[i]==b[i])
+            {
+                STemp += a[i];
+            }
+            else
+            {
+                STemp += "_";
+            }
+        }
+        if (a.Equals(STemp))
+        {
+            return true;
         }
         else
         {
-            STemp += "_";
+            return false;
         }
-    }
-    if (a.Equals(STemp))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
 
     }
 

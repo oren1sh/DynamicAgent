@@ -24,8 +24,20 @@ public class MenuScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
+                activity.Call<bool>("moveTaskToBack", true);
+            }
+            else
+            {
+                Application.Quit();
+            }
+        }
+    }
 
     public void OnBackMenu()
     {
@@ -41,6 +53,7 @@ public class MenuScript : MonoBehaviour {
 
     }
 
+
     public void OnStartNewGame()
     {
         //Debug.Log("OnStartNewGame");
@@ -53,7 +66,7 @@ public class MenuScript : MonoBehaviour {
         if (GameHeader.DicByLayer == null || (GameHeader.CurrentTurn == 0 && !GameHeader.DicByLayer.ContainsKey(0)))//first play, get the layer 0's states
         {
             //Debug.Log("GameHeader.CurrentTurn==0 and i'm loading the DIC");
-            GameHeader.GetStatesForLayer();//load 0 and 1
+            GameHeader.GetStatesForLayer(GameHeader.DicByLayer);//load 0 and 1
         }
 
     }
@@ -83,7 +96,16 @@ public class MenuScript : MonoBehaviour {
 
     public void OnExit()
     {
+        Debug.Log("OnExit()");
 
-
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
+            activity.Call<bool>("moveTaskToBack", true);
+        }
+        else
+        {
+            Application.Quit();
+        }
     }
 }

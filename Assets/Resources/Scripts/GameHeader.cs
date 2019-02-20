@@ -18,7 +18,7 @@ public class GameHeader : MonoBehaviour {
     public static int numPlayers { set; get; }
     public static int CurrentTurn { set; get; }
     public static string Borad { set; get; }
-    public static int BoradSize { set; get; }
+    public static int BoradSize = 3;
     public static List<string> WinGeneSet { get; set; }//key=token,vale = bitarray
     public static Dictionary<string, string> TokenTrns;
     public static string[] Tokens { set; get; }
@@ -29,7 +29,6 @@ public class GameHeader : MonoBehaviour {
     public static bool NeedToTrns { get; set; }
     public static bool Dirty { get; set; }
     public static string LastState=null;
-    [ThreadStatic]
     public static Dictionary<int, List<State>> DicByLayer;
     
     private void Awake()
@@ -59,7 +58,7 @@ public class GameHeader : MonoBehaviour {
         NeedToTrns = false;
         //Debug.Log("numPlayers" + numPlayers);
         //Debug.Log("CurrentTurn" + CurrentTurn);
-        //Debug.Log("BoradSize" + BoradSize);
+        Debug.Log("BoradSize" + BoradSize);
         //Debug.Log("Borad" + Borad);
         //Debug.Log("BWin" + BWin);
         //end setup game
@@ -68,8 +67,8 @@ public class GameHeader : MonoBehaviour {
         SceneObjects.SetActive(true);
         //
     }
-    static int v = 0;
-    public static void GetStatesForLayer()
+    public static int v = 0;
+    public static void GetStatesForLayer(Dictionary<int,List<State>> dicTarget)
     {
         if (v == -1)
             v = 1;
@@ -84,42 +83,31 @@ public class GameHeader : MonoBehaviour {
 
         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
 
-            //get states from data base - in each state get the edges
-           // Debug.Log("loading layer " + v);
+        //get states from data base - in each state get the edges
+        // Debug.Log("loading layer " + v);
 
-            //value = edges
-            FirebaseDatabase.DefaultInstance
-          .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").Child("" + v).Child("States")
-          .ValueChanged += GameHeader_ValueChanged;
-
-        
-/*
+        //value = edges
         FirebaseDatabase.DefaultInstance
-         .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").Child((v + 1).ToString()).Child("States")
-         .ValueChanged += GameHeader_ValueChanged1;
-            FirebaseDatabase.DefaultInstance
-         .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").Child((v + 2).ToString()).Child("States")
-         .ValueChanged += GameHeader_ValueChanged2;
-        */
+      .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").Child("" + v).Child("States")
+      .ValueChanged += (sender, e) => GameHeader_ValueChanged(sender, e, dicTarget); 
+
+
+
+        /*
+                FirebaseDatabase.DefaultInstance
+                 .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").Child((v + 1).ToString()).Child("States")
+                 .ValueChanged += GameHeader_ValueChanged1;
+                    FirebaseDatabase.DefaultInstance
+                 .GetReference("BoardSize").Child("" + GameHeader.BoradSize).Child("Layers").Child((v + 2).ToString()).Child("States")
+                 .ValueChanged += GameHeader_ValueChanged2;
+                */
 
     }
 
-    private static void GameHeader_ValueChanged(object sender, ValueChangedEventArgs e)
+    public static void LoadSnapshotToDictionary(Dictionary<string, object> snapshotValue,Dictionary<int,List<State>> dicTarget, int currentV)
     {
         try {
-            int currentV = v;
-
-            if (e.DatabaseError != null)
-            {
-                Debug.LogError(e.DatabaseError.Message);
-                return;
-            }
-
-            // Do something with the data in args.Snapshot
-            DataSnapshot snapshot = e.Snapshot;
-
-            Dictionary<string, object> dic = (Dictionary<string, object>)snapshot.Value;
-
+            
             List<State> value = new List<State>();
             State currentState;
             //Debug.Log("dic contains " + staticDic.Count + " elements");
@@ -130,7 +118,7 @@ public class GameHeader : MonoBehaviour {
             Dictionary<string, object> valuesDic;
 
             Edge currentEdge;
-            foreach (KeyValuePair<string, System.Object> item in dic)
+            foreach (KeyValuePair<string, System.Object> item in snapshotValue)
             {
                 edges.Clear();
 
@@ -139,13 +127,18 @@ public class GameHeader : MonoBehaviour {
                 valuesDic = (Dictionary<string, System.Object>)item.Value;
 
                 //edgesDic = (Dictionary<string, System.Object>)valuesDic["Edges"];
+               
 
                 currentState = new State
                 {
                     Id = item.Key,
                     Edges = new List<Edge>(),
-                    Layer = (int.Parse(valuesDic["LayerID"].ToString()))
+                    Layer = (int.Parse(valuesDic["LayerID"].ToString())),
+                    WinState = false
                 };
+                if (valuesDic.ContainsKey("Win"))
+                    currentState.WinState = bool.Parse(valuesDic["Win"].ToString());
+                
                 //foreach (KeyValuePair<string, System.Object> keyValuePair in valuesDic)
                 //    Debug.Log("key in values dic ===== " + keyValuePair.Key);
                 if (!valuesDic.ContainsKey("Edges"))
@@ -154,7 +147,8 @@ public class GameHeader : MonoBehaviour {
                     edgesDic = (Dictionary<string, System.Object>)valuesDic["Edges"];
 
 
-                foreach (KeyValuePair<string, System.Object> keyValue in edgesDic)
+
+                    foreach (KeyValuePair<string, System.Object> keyValue in edgesDic)
                 {
                     Dictionary<string, System.Object> currentEdgeDB = new Dictionary<string, System.Object>();
 
@@ -206,16 +200,17 @@ public class GameHeader : MonoBehaviour {
                 }//end foreach edge
                 currentState.Edges.AddRange(edges);
                 currentV = currentState.Layer;
+
                 value.Add(currentState);
                 //Debug.Log("layer " + currentState.Layer + " and state " + currentState.Id);
                 State found;
-                if (GameHeader.DicByLayer.ContainsKey(currentState.Layer))//has this layer, add the state to the list
+                if (dicTarget.ContainsKey(currentState.Layer))//has this layer, add the state to the list
                 {
 
-                    found = GameHeader.DicByLayer[currentState.Layer].Find(s => s.Id.Equals(currentState.Id));
+                    found = dicTarget[currentState.Layer].Find(s => s.Id.Equals(currentState.Id));
                     if (found == null)//add the state
                     {
-                        GameHeader.DicByLayer[currentState.Layer].Add(currentState);
+                        dicTarget[currentState.Layer].Add(currentState);
                     }
                     else//update the edges
                     {
@@ -227,21 +222,40 @@ public class GameHeader : MonoBehaviour {
             }
             //Debug.Log("dic contains " + DicByLayer.Count + " layers");
             //Debug.Log("my*********************** key is==== " + key + "  num of states ===  " + value.Count);
-            if (!GameHeader.DicByLayer.ContainsKey(currentV))
+            if (!dicTarget.ContainsKey(currentV))
             {
-                GameHeader.DicByLayer.Add(currentV, value);//add to the dictionary
+                dicTarget.Add(currentV, value);//add to the dictionary
             }
 
             if (v == 0)
             {
                 v = -1;
-                GetStatesForLayer();
+                GetStatesForLayer(dicTarget);
             }
         }
         catch (Exception ex)
         {
-            Debug.Log("we fuck up with the database == " + ex);
+            Debug.Log("we fuck up with the database == " + ex.Message);
         }
+
+    }//end load snapshot to dic
+    private static void GameHeader_ValueChanged(object sender, ValueChangedEventArgs e,Dictionary<int,List<State>> dicTarget)
+    {
+        if (dicTarget == null)
+            dicTarget = GameHeader.DicByLayer;
+        
+            int currentV = v;
+
+            if (e.DatabaseError != null)
+            {
+                Debug.LogError(e.DatabaseError.Message);
+                return;
+            }
+
+            // Do something with the data in args.Snapshot
+            DataSnapshot snapshot = e.Snapshot;
+        Dictionary<string, object> dic = (Dictionary<string, object>)snapshot.Value;
+        LoadSnapshotToDictionary(dic, dicTarget, currentV);
     }//end on value changed //end of func!
     
     /*
@@ -518,7 +532,7 @@ public class GameHeader : MonoBehaviour {
         if (!GameHeader.DicByLayer.ContainsKey(GameHeader.CurrentTurn + 1))//load this layer
         {
             //Debug.Log("GameHeader.CurrentTurn2=====" + GameHeader.CurrentTurn);
-            GameHeader.GetStatesForLayer();
+            GameHeader.GetStatesForLayer(DicByLayer);
             //foreach (KeyValuePair<int, List<State>> kv in GameHeader.DicByLayer)
             //    Debug.Log(kv.Key + " 1contains " + kv.Value.Count + " 1states ");
         }

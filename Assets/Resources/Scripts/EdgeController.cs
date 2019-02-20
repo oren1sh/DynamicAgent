@@ -232,6 +232,7 @@ public class EdgeController
         mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn).ToString()).Child("States")
         .Child(currentState.Id)
             .Child("LayerID").SetValueAsync(currentState.Layer);
+        
         mDatabaseRef.Child("BoardSize").Child(GameHeader.BoradSize.ToString()).Child("Layers").Child((GameHeader.CurrentTurn).ToString()).Child("States")
         .Child(currentState.Id)
             .Child("Edges").Child(ETemp.Id).SetRawJsonValueAsync(json);
