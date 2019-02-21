@@ -8,11 +8,14 @@ using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class GameHeader : MonoBehaviour {
 
 
     public GameObject SceneObjects;
+
+    public SceneManager Manager;
 
 
     public static int numPlayers { set; get; }
@@ -33,6 +36,10 @@ public class GameHeader : MonoBehaviour {
     
     private void Awake()
     {
+        
+
+
+        DontDestroyOnLoad(this.gameObject);
         //general setup for a game(3X3)
         CurrentToken = "X";
         WinGeneSet = new List<string>();
@@ -543,8 +550,20 @@ public class GameHeader : MonoBehaviour {
 
     }
 
+    public void GoToBrain()
+    {
+        SceneManager.LoadScene("BrainView");
+
+    }
+
+    public void GoToGame()
+    {
+        SceneManager.LoadScene("Main");
+
+    }
 
 
 
-   
+
+
 }

@@ -27,6 +27,7 @@ public class BrainCreator : MonoBehaviour {
         // Use this for initialization
     void Start () {
         databaseLoaded = false;
+        GameHeader = GameObject.Find("GameHeader").GetComponent<GameHeader>();
     }
 	
 	// Update is called once per frame
@@ -45,7 +46,7 @@ public class BrainCreator : MonoBehaviour {
         {
             //Debug.Log("a =========>" + a);
             win = a.Replace("\"", "").Remove(0, a.IndexOf("-"));//a=" W-_______"
-            if (GameMaster.StrAndSter(win, stateID.Id))
+            if (StrAndSter(win, stateID.Id))
                 return Color.green;
         }  
        return Color.white;
@@ -100,6 +101,7 @@ public class BrainCreator : MonoBehaviour {
         }
         //foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
         //    Debug.Log(kv.Key + " * **---*** " + "val  after= " + kv.Value);
+        Color color1;
         for (int i = 0; i < (GameHeader.BoradSize * GameHeader.BoradSize); i++)
         {
             if (dicTarget.ContainsKey(i))
@@ -123,8 +125,20 @@ public class BrainCreator : MonoBehaviour {
                             Vector3 dir = (NameToPosDic[E.Sto] - newPos).normalized;
                             float dir1 = (NameToPosDic[E.Sto] - newPos).magnitude;
 
+                            if (i % 2 == 0)
+                            {
+                                //Debug.Log("DrawRay-Color.blue");
+                                color1 = Color.blue;
+                            }
+                            else
+                            {
+                                //Debug.Log("DrawRay-Color.red");
 
-                            Debug.DrawRay(newPos, dir1 * dir, color[i], Mathf.Infinity, true);
+                                color1 = Color.red;
+                            }
+
+
+                            Debug.DrawRay(newPos, dir1 * dir, color1, 120, true);
                         }
 
 
@@ -325,5 +339,36 @@ public class BrainCreator : MonoBehaviour {
         }//end try
         catch (Exception ex) { Debug.Log(ex.Message); }
     }//end value changed
+
+
+    //a = _X___X__
+    //b = _X_O_X__
+    //STemp = _X___X__
+    public bool StrAndSter(string a, string b)//is a&b=B
+    {
+        string STemp = "";
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (a[i] == b[i])
+            {
+                STemp += a[i];
+            }
+            else
+            {
+                STemp += "_";
+            }
+        }
+        if (a.Equals(STemp))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
 }//end class
 
