@@ -123,7 +123,7 @@ public class CpuPlayer
                 }
             }//end if DicByLayer have the layer
         }//end if DicByLayer has something
-
+        Debug.Log("the dic is empty");
         index = Random.Range(0, TargetsOfOptinity.Count);
         //Debug.Log("TargetsOfOptinity[index] == " + TargetsOfOptinity[index]);
         //Debug.Log("[index] == " + index);

@@ -4,10 +4,10 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: 3DTextSelawikSemilight
-  m_Shader: {fileID: 4800000, guid: cfe12bbf45a06fb4b8fce6adb726485f, type: 3}
+  m_Shader: {fileID: 4800000, guid: f81f0165d269f8747b66d29805e93617, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0

@@ -12,7 +12,12 @@ public class BrainCreator : MonoBehaviour {
     public GameObject StateSimple;
     public GameMaster GameMaster;
     public GameHeader GameHeader;
+
+    public GameObject theFater;
+
+
     public Ray Ray;
+    public Material lineMat;
 
     public List<GameObject> nodes;
 
@@ -49,7 +54,7 @@ public class BrainCreator : MonoBehaviour {
             if (StrAndSter(win, stateID.Id))
                 return Color.green;
         }  
-       return Color.white;
+       return Color.black;
     }
     void CreateBrain()
     {
@@ -80,7 +85,7 @@ public class BrainCreator : MonoBehaviour {
                     GameObject go = Instantiate(StateSimple, newPos, Quaternion.identity);
                     go.name = states.Id;
                     go.GetComponent<MeshRenderer>().material.color = GetColorForState(states);
-                    go.transform.parent = this.transform;
+                    go.transform.parent = theFater.transform;
                     nodes.Add(go);
                     NameToPosDic.Add(states.Id, new Vector3(go.transform.position.x, go.transform.position.y, go.transform.position.z));
                     //foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
@@ -129,16 +134,42 @@ public class BrainCreator : MonoBehaviour {
                             {
                                 //Debug.Log("DrawRay-Color.blue");
                                 color1 = Color.blue;
+                                lineMat.color = color1;
                             }
                             else
                             {
                                 //Debug.Log("DrawRay-Color.red");
 
                                 color1 = Color.red;
+                                lineMat.color = color1;
                             }
+                            Debug.Log("start Drawing line");
+                            //GL.PushMatrix();
+                            //lineMat.SetPass(0);
+                            //GL.LoadOrtho();
+
+                            //GL.Begin(GL.LINES);
+                            //GL.Color(Color.red);
+                            //GL.Vertex(newPos);
+                            //GL.Vertex(NameToPosDic[E.Sto]);
+                            //GL.End();
+
+                            //GL.PopMatrix();
 
 
-                            Debug.DrawRay(newPos, dir1 * dir, color1, 120, true);
+                            GL.PushMatrix();
+                            lineMat.SetPass(0);
+                            GL.LoadOrtho();
+
+                            GL.Begin(GL.LINES);
+                            GL.Color(Color.red);
+                            GL.Vertex3(0, 0, 0);
+                            GL.Vertex3(1000 * i, 1000 * i, 1000 * i);
+                            GL.End();
+
+                            GL.PopMatrix();
+                            Debug.Log("end Drawing line");
+                            //Debug.DrawRay(newPos, dir1 * dir, color1, 120, true);
                         }
 
 
@@ -153,7 +184,7 @@ public class BrainCreator : MonoBehaviour {
 
 
     float radius = 1f;
-    private Dictionary<int, List<State>> dicTarget;
+    public Dictionary<int, List<State>> dicTarget;
 
     /*
     void OnDrawGizmosSelected()
@@ -219,86 +250,7 @@ public class BrainCreator : MonoBehaviour {
         Debug.Log("things before loading db");
         databaseLoaded = false;
           
-          //Debug.Log("PlaceState()");
-
-          //NameToPosDic = new Dictionary<string, Vector3>();
-          //int index = 0;
-          //int j = 0;
-          //List<Color> color = new List<Color>{Color.black, Color.blue, Color.cyan, Color.gray, Color.green, Color.grey, Color.red, Color.white, Color.yellow };
-          //GameObject sp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-          //sp.transform.position = Vector3.zero;
-          //for (int i = 0; i < (GameHeader.BoradSize* GameHeader.BoradSize); i++)
-          //{
-          //    if (GameHeader.DicByLayer.ContainsKey(i))
-          //    {
-          //        j = 0;
-          //        foreach (State states in GameHeader.DicByLayer[i])
-          //        {
-
-          //            radius = (float)GameHeader.DicByLayer[i].Count * i;
-          //            //Debug.Log("radius " + radius);
-          //            float angle = j * Mathf.PI * 2f / GameHeader.DicByLayer[i].Count;
-          //            //Debug.Log("angle " + angle);
-          //            Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i*10, Mathf.Sin(angle) * radius);
-          //            //Debug.Log("newPos " + newPos);
-          //            GameObject go = Instantiate(StateSimple, newPos, Quaternion.identity);
-          //            go.name = states.Id;
-          //            go.GetComponent<MeshRenderer>().material.color = color[i];
-
-
-          //            NameToPosDic.Add(states.Id, new Vector3(go.transform.position.x, go.transform.position.y, go.transform.position.z));
-          //            foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
-          //              Debug.Log(kv.Key + " * **---*** " + "val = " + kv.Value);
-
-
-          //            //foreach (Edge E in states.Edges)
-          //            //{
-          //            //    Color color = Color.blue;
-          //            //    Debug.DrawRay(GameObject.Find(E.Sto).transform.localPosition, newPos, color);
-          //            //    Debug.Log("DrawRay " + GameObject.Find(E.Sfrom).transform.localPosition+" to "+ newPos + " color "+ color);
-
-          //            //}
-
-          //            j++;
-          //        }
-          //    }
-          //}
-          //foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
-          //    Debug.Log(kv.Key + " * **---*** " + "val  after= " + kv.Value);
-          //for (int i = 0; i < (GameHeader.BoradSize * GameHeader.BoradSize); i++)
-          //{
-          //    if (GameHeader.DicByLayer.ContainsKey(i))
-          //    {
-          //        j = 0;
-          //        foreach (State states in GameHeader.DicByLayer[i])
-          //        {
-          //            radius = (float)GameHeader.DicByLayer[i].Count * i;
-          //            //Debug.Log("radius " + radius);
-          //            float angle = j * Mathf.PI * 2f / GameHeader.DicByLayer[i].Count;
-          //            //Debug.Log("angle " + angle);
-          //            Vector3 newPos = new Vector3(Mathf.Cos(angle) * radius, i * 10, Mathf.Sin(angle) * radius);
-          //            //Debug.Log("newPos " + newPos);
-
-          //            foreach (Edge E in states.Edges)
-          //            {
-          //                if (E.Sto != null && NameToPosDic.ContainsKey(E.Sto))
-          //                {
-
-          //                    Vector3 pos = newPos;
-          //                    Vector3 dir = (NameToPosDic[E.Sto] - newPos).normalized;
-          //                    float dir1 = (NameToPosDic[E.Sto] - newPos).magnitude;
-
-
-          //                    Debug.DrawRay(newPos, dir1 * dir , color[i], Mathf.Infinity ,true);
-          //                }
-
-
-          //            }
-
-          //            j++;
-          //        }
-          //    }
-          //}
+        
       }
 
     private void BrainCreator_ValueChanged(object sender, ValueChangedEventArgs e, Dictionary<int, List<State>> dicTarget)
@@ -350,7 +302,7 @@ public class BrainCreator : MonoBehaviour {
 
         for (int i = 0; i < a.Length; i++)
         {
-            if (a[i] == b[i])
+            if (a[i] == b[i] && a[i]!='_')
             {
                 STemp += a[i];
             }

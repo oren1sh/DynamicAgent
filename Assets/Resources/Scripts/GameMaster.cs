@@ -362,7 +362,7 @@ public class GameMaster : MonoBehaviour {
 
         for (int i = 0; i < a.Length; i++)
         {
-            if(a[i]==b[i])
+            if(a[i]==b[i] && a[i] != '_')
             {
                 STemp += a[i];
             }
