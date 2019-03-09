@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,7 @@ public class CpuPlayer
     public string name { get; set; }//Token
     string CurrentState;
     public static string mod { get; set; }
+    //public static string mod { get; set; }
     string TargetEdge;
     public List<int> TargetsOfOptinity;
 
@@ -52,6 +54,31 @@ public class CpuPlayer
                 TargetEdge += $",{B.i}-{GameHeader.CurrentToken}-{GameHeader.CurrentTurn}";//make edge id
             }
         }
+
+        
+        foreach (int T in TargetsOfOptinity)//check if I can win next turn 
+        {
+            StringBuilder sb = new StringBuilder(CurrentState);
+            sb[T] = char.Parse(name);
+            string tempS = sb.ToString();
+            if (CheckWin(tempS))//if the state can win?
+            {
+                return GameMaster.Buttons[T];
+            }
+        }
+        foreach (int T in TargetsOfOptinity)//check if the next player can win next turn 
+        {
+            StringBuilder sb = new StringBuilder(CurrentState);
+            sb[T] = char.Parse(GameHeader.TokensL[(GameHeader.TokensL.IndexOf(name) + 1) % 2]);
+            string tempS = sb.ToString();
+
+            if (CheckWin(tempS))//if the state can win?
+            {
+                return GameMaster.Buttons[T];
+            }
+        }
+
+
 
         if (GameHeader.DicByLayer.Count != 0)//states and edges are loaded
         {
@@ -131,5 +158,62 @@ public class CpuPlayer
 
 
     }//end of playTurn()
+
+    private bool CheckWin(string b)
+    {
+        string win;
+        foreach (string a in GameHeader.WinGeneSet)
+        {
+            //Debug.Log("a =========>" + a);
+            win = a.Replace("\"", "").Remove(0, a.IndexOf("-"));//a=" W-_______"
+            if (StrAndSter(win, b))
+            {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+
+    //a = _X___X__
+    //b = _X_O_X__
+    //STemp = _X___X__
+    public bool StrAndSter(string a, string b)//is a&b=B
+    {
+        string STemp = "";
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (a[i] == b[i] && a[i] != '_')
+            {
+                STemp += a[i];
+            }
+            else
+            {
+                STemp += "_";
+            }
+        }
+        if (a.Equals(STemp))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
+    //public string ReplaceAt(this string input, int index, char newChar)
+    //{
+    //    if (input == null)
+    //    {
+    //        Debug.Log("input");
+    //    }
+    //    char[] chars = input.ToCharArray();
+    //    chars[index] = newChar;
+    //    return new string(chars);
+    //}
 
 }

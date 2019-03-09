@@ -25,6 +25,7 @@ public class GameHeader : MonoBehaviour {
     public static List<string> WinGeneSet { get; set; }//key=token,vale = bitarray
     public static Dictionary<string, string> TokenTrns;
     public static string[] Tokens { set; get; }
+    public static List<string> TokensL { set; get; }
     public static string Win { set; get; }
     public static bool BWin { set; get; }
     public static string CurrentToken { get; set; }
@@ -44,15 +45,16 @@ public class GameHeader : MonoBehaviour {
         CurrentToken = "X";
         WinGeneSet = new List<string>();
         Tokens = new string[4];
+        TokensL = new List<string>(4);
         Tokens[0] = "X";
-        //  WinGeneSet.Add("X", new List<BitArray>());
+        TokensL.Add("X");
         Tokens[1] = "O";
-        //WinGeneSet.Add("O", new List<BitArray>());
+        TokensL.Add("O");
         Tokens[2] = "@";
-        // WinGeneSet.Add("@", new List<BitArray>());
+        TokensL.Add("@");
         Tokens[3] = "&";
-        //WinGeneSet.Add("&", new List<BitArray>());
-       // Debug.Log("Tokens" + Tokens);
+        TokensL.Add("&");
+        // Debug.Log("Tokens" + Tokens);
         //Debug.Log("WinGeneSet" + WinGeneSet);
         numPlayers = 2;
         CurrentTurn = 0;

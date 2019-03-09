@@ -151,10 +151,18 @@ public class GameMaster : MonoBehaviour {
 
 
 
-        if (!GameHeader.CurrentToken.Equals("X") || AutoPlay)//if not human player
+        if (!GameHeader.CurrentToken.Equals("X"))//if not human player
         {
             //set btn by random ....
             Bnt = cpuPlayer.PlayTurn();
+            if (Bnt == null)
+                goto ENDGAME;
+        }
+
+        if (AutoPlay)//if not human player
+        {
+            //set btn by random ....
+            Bnt = cpuPlayer2.PlayTurn();
             if (Bnt == null)
                 goto ENDGAME;
         }
