@@ -26,9 +26,12 @@ public class CameraMover : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        camera.AddRelativeForce(new Vector3(joystickMov.Horizontal * 1000f,
+        camera.AddRelativeForce(new Vector3(camera.velocity.x,
                                        camera.velocity.y,
-                                        joystickMov.Vertical * 1000f),ForceMode.Force);
+                                        joystickMov.Vertical * 100f),ForceMode.Force);
+        camera.AddRelativeForce(new Vector3(joystickMov.Horizontal * 100f,
+                                       camera.velocity.y,
+                                        camera.velocity.z), ForceMode.Force);
         //rot.eulerAngles = new Vector3(joystickRot.Vertical * -10f,
         //                               camera.velocity.y,
         //                                joystickRot.Horizontal * 10f);

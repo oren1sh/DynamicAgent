@@ -179,7 +179,7 @@ public class CpuPlayer
     //a = _X___X__
     //b = _X_O_X__
     //STemp = _X___X__
-    public bool StrAndSter(string a, string b)//is a&b=B
+    public bool StrAndSter(string a, string b)//is currentState&WinSet[i]=WinSet[i]
     {
         string STemp = "";
 
