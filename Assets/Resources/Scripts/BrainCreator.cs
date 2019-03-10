@@ -87,6 +87,7 @@ public class BrainCreator : MonoBehaviour {
                     go.GetComponent<MeshRenderer>().material.color = GetColorForState(states);
                     go.transform.parent = theFater.transform;
                     nodes.Add(go);
+                    if(!NameToPosDic.ContainsKey(states.Id))
                     NameToPosDic.Add(states.Id, new Vector3(go.transform.position.x, go.transform.position.y, go.transform.position.z));
                     //foreach (KeyValuePair<string, Vector3> kv in NameToPosDic)
                     //    Debug.Log(kv.Key + " * **---*** " + "val = " + kv.Value);
@@ -143,33 +144,33 @@ public class BrainCreator : MonoBehaviour {
                                 color1 = Color.red;
                                 lineMat.color = color1;
                             }
-                            Debug.Log("start Drawing line");
+                            //Debug.Log("start Drawing line");
+                            ////GL.PushMatrix();
+                            ////lineMat.SetPass(0);
+                            ////GL.LoadOrtho();
+
+                            ////GL.Begin(GL.LINES);
+                            ////GL.Color(Color.red);
+                            ////GL.Vertex(newPos);
+                            ////GL.Vertex(NameToPosDic[E.Sto]);
+                            ////GL.End();
+
+                            ////GL.PopMatrix();
+
+
                             //GL.PushMatrix();
                             //lineMat.SetPass(0);
                             //GL.LoadOrtho();
 
                             //GL.Begin(GL.LINES);
                             //GL.Color(Color.red);
-                            //GL.Vertex(newPos);
-                            //GL.Vertex(NameToPosDic[E.Sto]);
+                            //GL.Vertex3(0, 0, 0);
+                            //GL.Vertex3(1000 * i, 1000 * i, 1000 * i);
                             //GL.End();
 
                             //GL.PopMatrix();
-
-
-                            GL.PushMatrix();
-                            lineMat.SetPass(0);
-                            GL.LoadOrtho();
-
-                            GL.Begin(GL.LINES);
-                            GL.Color(Color.red);
-                            GL.Vertex3(0, 0, 0);
-                            GL.Vertex3(1000 * i, 1000 * i, 1000 * i);
-                            GL.End();
-
-                            GL.PopMatrix();
-                            Debug.Log("end Drawing line");
-                            //Debug.DrawRay(newPos, dir1 * dir, color1, 120, true);
+                            //Debug.Log("end Drawing line");
+                            Debug.DrawRay(newPos, dir1 * dir, color1, 120, true);
                         }
 
 

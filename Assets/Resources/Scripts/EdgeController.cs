@@ -239,52 +239,8 @@ public class EdgeController
 
         
 
-        //mDatabaseRef.SetValueAsync($"BoardSize/{GameHeader.BoradSize.ToString()} " +
-        //    $"Layer/{ETemp.fromlayer.ToString()}" +
-        //    $"ID/{ETemp.Id}" , json);
-        /*
-         "BoardSize" : [ {
-                 "Layer" : [ {
-                        "ID" : {
-                            "1-X-0" : {
-         */
-
     }
-
-    /* public void LoadEdgeLists()
-     {
-         int boardSize = GameHeader.BoradSize;
-         int TargetLayer = GameHeader.CurrentTurn;
-         //AllEdges;
-         //CheckEdges;
-         //NewEdges;
-         //EdgeByLayer;
-         // Set this before calling into the realtime database.
-         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://dynamicagent-681fa.firebaseio.com/");
-
-
-         // Get the root reference location of the database.
-         DatabaseReference mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
-
-         FirebaseDatabase.DefaultInstance
-                     .GetReference("BoardSize").Child(boardSize.ToString()).Child("Edges")
-                     .GetValueAsync().ContinueWith(task => {
-                                   if (task.IsFaulted)
-                                   {
-                                           // Handle the error...
-                                       }
-                                   else if (task.IsCompleted)
-                                   {
-                                       DataSnapshot snapshot = task.Result;
-                             Debug.Log("we get that from dataBase === "+snapshot.ToString());
-                             // Do something with snapshot...
-
-                         }
-                               });
-
-
-
-     }*/
+    
 
 
 
